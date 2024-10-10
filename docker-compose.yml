@@ -1,0 +1,11 @@
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge
+    environment:
+      MSSQL_USER: "sa"
+      MSSQL_SA_PASSWORD: "*@Bob1000"
+      ACCEPT_EULA: "1"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"

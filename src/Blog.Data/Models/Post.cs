@@ -8,21 +8,21 @@ namespace Blog.Data.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [Required(ErrorMessage = "O campo {0} Ã© obrigatÃ³rio")]
         [Display(Name = "Titulo")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
         public string Title { get; set; }
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        [Display(Name = "Conteúdo")]
+        [Required(ErrorMessage = "O campo {0} Ã© obrigatÃ³rio")]
+        [Display(Name = "ConteÃºdo")]
         [StringLength(300, MinimumLength = 2, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
         public string Content { get; set; }
 
-        [Display(Name = "Data de Criação")]
-        [DataType(DataType.DateTime, ErrorMessage = "O campo {0} não está em formato incorreto")]
+        [Display(Name = "Data de CriaÃ§Ã£o")]
+        [DataType(DataType.DateTime, ErrorMessage = "O campo {0} nï¿½o estï¿½ em formato incorreto")]
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [Required(ErrorMessage = "O campo {0} Ã© obrigatÃ³rio")]
         public int AuthorId { get; set; }
 
         [Display(Name = "Autor")]

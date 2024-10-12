@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Blog.Data.Context;
+using Blog.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

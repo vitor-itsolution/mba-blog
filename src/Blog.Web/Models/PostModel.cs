@@ -10,7 +10,7 @@ namespace Blog.Web.Models
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Titulo")]
-        [StringLength(50, MinimumLength = 2, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
         public string Title { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
@@ -23,10 +23,10 @@ namespace Blog.Web.Models
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        public int AuthorId { get; set; }
+        public Guid AuthorId { get; set; }
 
         [Display(Name = "Autor")]
-        public virtual IdentityUser Author { get; set; }
+        public string AuthorName  { get; set; }
 
         public virtual ICollection<CommentModel> Comments { get; set; } = [];
     }

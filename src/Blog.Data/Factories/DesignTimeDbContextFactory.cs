@@ -12,7 +12,7 @@ namespace Blog.Data.Factories
             var basePath = Directory.GetCurrentDirectory();
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)
-                .AddJsonFile(Path.Combine(basePath, "..", "Blog.Mvc", "appsettings.json"))
+                .AddJsonFile(Path.Combine(basePath, "..", "Blog.Web", "appsettings.json"))
                 .Build();
 
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();

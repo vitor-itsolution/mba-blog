@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Blog.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -16,7 +12,7 @@ namespace Blog.Data.Factories
             var basePath = Directory.GetCurrentDirectory();
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)
-                .AddJsonFile(Path.Combine(basePath, "..", "Blog.Mvc", "appsettings.json"))
+                .AddJsonFile(Path.Combine(basePath, "..", "Blog.Web", "appsettings.json"))
                 .Build();
 
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();

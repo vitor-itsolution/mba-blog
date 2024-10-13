@@ -7,9 +7,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
 using Blog.Data.Models;
+using Blog.Web.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Blog.Web.Controllers
 {
+    [Authorize]
     public class PostsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,20 +23,28 @@ namespace Blog.Web.Controllers
             _context = context;
         }
 
-        // GET: Posts
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Posts.ToListAsync());
+            var posts = await _context.Posts
+                                      .Include(p => p.Author)
+                                      .OrderByDescending(p => p.CreateDate).ToListAsync();
+
+            return View(posts.Select(p => new PostModel
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Content = p.Content,
+                CreateDate = p.CreateDate,
+                AmountComment = p.Comments.Count(),
+                AuthorId = p.Author?.Id!,
+                AuthorName = p.Author?.UserName!
+            }));
         }
 
-        // GET: Posts/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [Route("detalhes/{id:int}")]
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var post = await _context.Posts
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
@@ -42,53 +54,61 @@ namespace Blog.Web.Controllers
 
             return View(post);
         }
-
-        // GET: Posts/Create
+        [Route("novo")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Posts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("novo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Content,CreateDate")] Post post)
+        public async Task<IActionResult> Create([Bind("Id,Title,Content")] PostModel postModel)
         {
             if (ModelState.IsValid)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var post = new Post
+                {
+                    Title = postModel.Title,
+                    Content = postModel.Content,
+                    CreateDate = postModel.CreateDate,
+                    AuthorId = userId
+                };
+
                 _context.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(post);
+
+            return View(postModel);
         }
-
-        // GET: Posts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [Route("editar/{id:int}")]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var post = await _context.Posts.Include(p => p.Author)
+                                           .FirstOrDefaultAsync(p => p.Id == id);
 
-            var post = await _context.Posts.FindAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
-            return View(post);
+            return View(new PostModel
+            {
+                Id = post.Id,
+                Title = post.Title,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author.UserName,
+                Content = post.Content,
+                CreateDate = post.CreateDate
+            });
         }
 
-        // POST: Posts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("editar/{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,CreateDate")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,CreateDate")] PostModel postModel)
         {
-            if (id != post.Id)
+            if (id != postModel.Id)
             {
                 return NotFound();
             }
@@ -97,12 +117,18 @@ namespace Blog.Web.Controllers
             {
                 try
                 {
+                    var post = await _context.Posts.FindAsync(postModel.Id);
+                    post.Title = postModel.Title;
+                    post.Content = postModel.Content;
+                    postModel.CreateDate = DateTime.Now;
+
                     _context.Update(post);
                     await _context.SaveChangesAsync();
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(post.Id))
+                    if (!PostExists(postModel.Id))
                     {
                         return NotFound();
                     }
@@ -113,17 +139,11 @@ namespace Blog.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(post);
+            return View(postModel);
         }
-
-        // GET: Posts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [Route("excluir/{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var post = await _context.Posts
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
@@ -131,11 +151,19 @@ namespace Blog.Web.Controllers
                 return NotFound();
             }
 
-            return View(post);
+            return View(new PostModel
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                CreateDate = post.CreateDate,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author?.UserName
+            });
         }
 
-        // POST: Posts/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("excluir/{id:int}")]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

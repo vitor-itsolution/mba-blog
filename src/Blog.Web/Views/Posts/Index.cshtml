@@ -1,47 +1,52 @@
-﻿@model IEnumerable<Blog.Data.Models.Post>
+﻿@model IEnumerable<Blog.Web.Models.PostModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Blog do Vitão";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
+<p style="padding: 20px 0px 20px 0px;">
+    <a asp-action="Create" class="btn btn-primary"><span class="fa fa-plus"> Novo</span></a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreateDate)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Content)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreateDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+
+@foreach (var item in Model)
+{
+    <div>
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="row">
+
+                <div class="row">
+                    <div class="col">
+                        <h3 class="title">@Html.DisplayFor(modelItem => item.Title)</h3>
+                    </div>
+                    <div class="col">
+                        <a class="btn btn-info" asp-action="Edit" asp-route-id="@item.Id"><span class="fa fa-pencil"></span></a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="fa fa-trash"></span></a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <span class="published">Data publicação @item.CreateDate.ToString("dd/MM/yyyy hh:mm:ss")</span>
+                    </div>
+                    <div class="col">
+                        <a asp-action="Details" asp-route-id="@item.Id"><span
+                                class="published">@Html.DisplayFor(modelItem
+                                => item.AmountComment) Comentários</span></a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <span class="content">@Html.DisplayFor(modelItem => item.Content)</span>
+            </div>
+        </div>
+    </div>
+</div>
+    <br />
+    <hr />
 }
-    </tbody>
-</table>

@@ -21,12 +21,12 @@ namespace Blog.Web.Models
         [DataType(DataType.DateTime, ErrorMessage = "O campo {0} não está em formato incorreto")]
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
-        [Required(ErrorMessage = "O campo {0} é obrigatório")]
-        public Guid AuthorId { get; set; }
+        public string AuthorId { get; set; }
 
         [Display(Name = "Autor")]
         public string AuthorName  { get; set; }
 
-        public virtual ICollection<CommentModel> Comments { get; set; } = [];
+        [Display(Name = "Comentários")]
+        public int AmountComment { get; set; }
     }
 }

@@ -15,7 +15,9 @@ namespace Blog.Data.Mappings
             .IsRequired()
             .HasMaxLength(300);
 
-            builder.HasOne(p => p.Author);
+            builder.HasOne(p => p.Author)
+            .WithMany()
+            .HasForeignKey(p => p.AuthorId);
 
             builder.ToTable("Comments");
         }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Web.Models
@@ -19,7 +18,7 @@ namespace Blog.Web.Models
         public string Content { get; set; }
 
         [Display(Name = "Data de Criação")]
-        [DataType(DataType.DateTime, ErrorMessage = "O campo {0} n�o est� em formato incorreto")]
+        [DataType(DataType.DateTime, ErrorMessage = "O campo {0} não está em formato incorreto")]
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]

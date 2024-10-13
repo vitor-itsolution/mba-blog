@@ -120,7 +120,7 @@ namespace Blog.Web.Controllers
                     var post = await _context.Posts.FindAsync(postModel.Id);
                     post.Title = postModel.Title;
                     post.Content = postModel.Content;
-                    postModel.CreateDate = DateTime.Now;
+                    post.CreateDate = DateTime.Now;
 
                     _context.Update(post);
                     await _context.SaveChangesAsync();

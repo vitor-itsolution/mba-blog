@@ -91,7 +91,7 @@ namespace Blog.Data.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -120,10 +120,10 @@ namespace Blog.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
@@ -146,7 +146,7 @@ namespace Blog.Data.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -170,16 +170,16 @@ namespace Blog.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -210,10 +210,10 @@ namespace Blog.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -235,7 +235,7 @@ namespace Blog.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -275,7 +275,7 @@ namespace Blog.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 

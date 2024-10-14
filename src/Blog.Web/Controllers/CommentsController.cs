@@ -30,11 +30,12 @@ namespace Blog.Web.Controllers
                 .Include(c => c.Author)
                 .Include(c => c.Post)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (comment == null)
             {
                 return NotFound();
             }
-
+          
             return View(new CommentModel
             {
                 Id = comment.Id,

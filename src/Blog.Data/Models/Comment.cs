@@ -7,6 +7,7 @@ namespace Blog.Data.Models
         public string AuthorId { get; set; }
         public virtual IdentityUser Author { get; set; }
         public string Content { get; set; }
+        public DateTime CreateDate { get; set; } = DateTime.Now;
         public int PostId { get; set; }
         public virtual Post Post { get; set; }
     }

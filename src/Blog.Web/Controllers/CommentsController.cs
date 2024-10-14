@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
 using Blog.Data.Models;
 using Blog.Web.Models;
+using System.Security.Claims;
 
 namespace Blog.Web.Controllers
 {
@@ -16,26 +17,35 @@ namespace Blog.Web.Controllers
             _context = context;
         }
 
+        [Route("[controller]/editar/{id:int}")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var comment = await _context.Comments
+                                           .Include(p => p.Author)
+                                           .Include(p => p.Post)
+                                           .FirstOrDefaultAsync(p => p.Id == id);
 
-            var comment = await _context.Comments.FindAsync(id);
             if (comment == null)
             {
                 return NotFound();
             }
-            return View(new CommentModel());
+
+            return View(new CommentModel
+            {
+                Id = comment.Id,
+                AuthorId = comment.AuthorId,
+                AuthorName = comment.Author.UserName,
+                Content = comment.Content,
+                CreateDate = comment.CreateDate,
+                PostId = comment.Post.Id
+            });
         }
 
-        [HttpPost]
+        [HttpPost("[controller]/editar/{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AuthorId,Content,CreateDate,PostId")] Comment comment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Content")] CommentModel commentModel)
         {
-            if (id != comment.Id)
+            if (id != commentModel.Id)
             {
                 return NotFound();
             }
@@ -44,12 +54,25 @@ namespace Blog.Web.Controllers
             {
                 try
                 {
+                    var comment = await _context.Comments.FindAsync(commentModel.Id);
+
+                    var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                    if (comment.AuthorId != authorId && !User.IsInRole("Admin"))
+                    {
+                        return Forbid();
+                    }
+
+                    comment.Content = commentModel.Content;
+                    comment.CreateDate = DateTime.Now;
+
                     _context.Update(comment);
                     await _context.SaveChangesAsync();
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.Id))
+                    if (!CommentExists(commentModel.Id))
                     {
                         return NotFound();
                     }
@@ -58,11 +81,9 @@ namespace Blog.Web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
             }
-            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", comment.AuthorId);
-            ViewData["PostId"] = new SelectList(_context.Posts, "Id", "Content", comment.PostId);
-            return View(comment);
+            return View(commentModel);
         }
 
         public async Task<IActionResult> Delete(int? id)
@@ -76,12 +97,19 @@ namespace Blog.Web.Controllers
                 .Include(c => c.Author)
                 .Include(c => c.Post)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (comment == null)
             {
                 return NotFound();
             }
 
-            return View(comment);
+            return View(new CommentModel
+            {
+                Id = comment.Id,
+                PostId = comment.PostId,
+                AuthorId = comment.AuthorId,
+                Content = comment.Content
+            });
         }
 
         [HttpPost, ActionName("Delete")]
@@ -89,13 +117,21 @@ namespace Blog.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var comment = await _context.Comments.FindAsync(id);
-            if (comment != null)
+            if (comment == null)
             {
-                _context.Comments.Remove(comment);
+                return NotFound();
             }
 
+            var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (comment.AuthorId != authorId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+            _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
         }
 
         private bool CommentExists(int id)

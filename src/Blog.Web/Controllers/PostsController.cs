@@ -219,11 +219,11 @@ namespace Blog.Web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
             }
             return View(postModel);
         }
-        
+
         [Route("excluir/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -267,7 +267,7 @@ namespace Blog.Web.Controllers
 
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
         }
 
         private bool PostExists(int id)

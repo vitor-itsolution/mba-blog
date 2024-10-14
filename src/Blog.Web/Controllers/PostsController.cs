@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
 using Blog.Data.Models;
@@ -21,14 +16,13 @@ namespace Blog.Web.Controllers
         public PostsController(ApplicationDbContext context)
         {
             _context = context;
+
         }
 
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            ViewData["AuthorId"] = authorId;
+            ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier); ;
 
             var posts = await _context.Posts
                                       .Include(p => p.Author)
@@ -47,6 +41,7 @@ namespace Blog.Web.Controllers
             }));
         }
 
+        [AllowAnonymous]
         [Route("{id:int}/comments")]
         public async Task<IActionResult> Comments(int id)
         {
@@ -58,20 +53,19 @@ namespace Blog.Web.Controllers
             {
                 return NotFound();
             }
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            ViewData["AuthorId"] = authorId;
+            ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier); ;
             ViewData["PostId"] = post.Id;
-            
+
             var comments = post.Comments.Select(p => new CommentModel
-                        {
-                            Id = p.Id,
-                            PostId = p.PostId,
-                            Content = p.Content,
-                            AuthorId = p.AuthorId,
-                            AuthorName = p.Author?.UserName!,
-                            CreateDate = p.CreateDate                            
-                        }).ToList();
+            {
+                Id = p.Id,
+                PostId = p.PostId,
+                Content = p.Content,
+                AuthorId = p.AuthorId,
+                AuthorName = p.Author?.UserName!,
+                CreateDate = p.CreateDate
+            }).ToList();
 
             return View(comments);
         }
@@ -166,6 +160,7 @@ namespace Blog.Web.Controllers
             {
                 return NotFound();
             }
+
             return View(new PostModel
             {
                 Id = post.Id,
@@ -191,9 +186,18 @@ namespace Blog.Web.Controllers
                 try
                 {
                     var post = await _context.Posts.FindAsync(postModel.Id);
+
+                    var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                    if (post.AuthorId != authorId && !User.IsInRole("Admin"))
+                    {
+                        return Forbid();
+                    }
+
                     post.Title = postModel.Title;
                     post.Content = postModel.Content;
                     post.CreateDate = DateTime.Now;
+                    post.AuthorId = authorId;
 
                     _context.Update(post);
                     await _context.SaveChangesAsync();
@@ -219,6 +223,7 @@ namespace Blog.Web.Controllers
         {
             var post = await _context.Posts
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (post == null)
             {
                 return NotFound();
@@ -241,11 +246,20 @@ namespace Blog.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var post = await _context.Posts.FindAsync(id);
-            if (post != null)
+
+            if (post == null)
             {
-                _context.Posts.Remove(post);
+                return NotFound();
             }
 
+            var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (post.AuthorId != authorId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

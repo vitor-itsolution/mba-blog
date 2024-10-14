@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
-using Blog.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Blog.Web.Models;
@@ -17,10 +11,12 @@ namespace Blog.Web.Controllers
     public class CommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly string _authorId;
 
         public CommentsController(ApplicationDbContext context)
         {
             _context = context;
+            _authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
         public async Task<IActionResult> Delete(int? id)
@@ -58,9 +54,7 @@ namespace Blog.Web.Controllers
                 return NotFound();
             }
 
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (comment.AuthorId != authorId && !User.IsInRole("Admin"))
+            if (comment.AuthorId != _authorId && !User.IsInRole("Admin"))
             {
                 return Forbid();
             }

@@ -223,6 +223,7 @@ namespace Blog.Web.Controllers
             }
             return View(postModel);
         }
+        
         [Route("excluir/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {

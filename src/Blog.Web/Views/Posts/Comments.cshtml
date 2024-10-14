@@ -17,17 +17,25 @@
 @foreach (var item in Model)
 {
     <div class="row">
-    <div class="col">
+    <div class="col-md-4">
         <span class="published">Data publicação @item.CreateDate.ToString("dd/MM/yyyy HH:mm:ss")</span>
+    </div>
+    <div class="col-md-2">
         @{
+                if (ViewBag.AuthorId == @item.AuthorId)
+                {
+                    <a class="btn" asp-area="" asp-controller="Comments" asp-action="Edit" asp-route-id="@item.Id"><span
+                            class="fa fa-pencil" style="color: #0dcaf0"></span></a>
+                }
+            }
+            @{
                 if (ViewBag.AuthorId == @item.AuthorId || ViewBag.IsAdmin)
                 {
-                    <a class="btn" style="color: #dc3545;" asp-area="" asp-controller="Comments" asp-action="Delete"
-                        asp-route-id="@item.Id"><span class="fa fa-trash"></span></a>
+                    <a class="btn" asp-area="" asp-controller="Comments" asp-action="Delete" asp-route-id="@item.Id"><span
+                            class="fa fa-trash" style="color: #dc3545;"></span></a>
                 }
             }
         </div>
-
     </div>
     <div class="row">
     <span class="content">@item.Content</span>

@@ -32,7 +32,7 @@
 
                         }
                         @{
-                            if (ViewBag.AuthorId == @item.AuthorId)
+                            if (ViewBag.AuthorId == @item.AuthorId || ViewBag.IsAdmin)
                             {
                                 <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span
                                         class="fa fa-trash"></span></a>

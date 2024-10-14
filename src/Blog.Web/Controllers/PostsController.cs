@@ -5,6 +5,8 @@ using Blog.Data.Models;
 using Blog.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blog.Web.Controllers
 {
@@ -22,7 +24,8 @@ namespace Blog.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier); ;
+            ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewData["IsAdmin"] = User?.IsInRole("Admin");
 
             var posts = await _context.Posts
                                       .Include(p => p.Author)
@@ -55,7 +58,9 @@ namespace Blog.Web.Controllers
             }
 
             ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier); ;
+            ViewData["IsAdmin"] = User?.IsInRole("Admin");
             ViewData["PostId"] = post.Id;
+
 
             var comments = post.Comments.Select(p => new CommentModel
             {
@@ -253,7 +258,7 @@ namespace Blog.Web.Controllers
             }
 
             var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             if (post.AuthorId != authorId && !User.IsInRole("Admin"))
             {
                 return Forbid();

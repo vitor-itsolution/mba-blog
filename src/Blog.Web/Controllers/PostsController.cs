@@ -45,7 +45,7 @@ namespace Blog.Web.Controllers
         }
 
         [AllowAnonymous]
-        [Route("{id:int}/comments")]
+        [Route("[controller]/{id:int}/comments")]
         public async Task<IActionResult> Comments(int id)
         {
             var post = await _context.Posts
@@ -75,7 +75,7 @@ namespace Blog.Web.Controllers
             return View(comments);
         }
 
-        [Route("posts/{id:int}/novo-comentario")]
+        [Route("[controller]/{id:int}/novo-comentario")]
         public async Task<IActionResult> CreateComment(int id)
         {
             var post = await _context.Posts
@@ -93,7 +93,7 @@ namespace Blog.Web.Controllers
             return View();
         }
 
-        [HttpPost("posts/{id:int}/novo-comentario")]
+        [HttpPost("[controller]/{id:int}/novo-comentario")]
         public async Task<IActionResult> CreateComment([Bind("Content")] CommentModel commentModel, int id)
         {
             if (ModelState.IsValid)
@@ -126,13 +126,13 @@ namespace Blog.Web.Controllers
             return View(commentModel);
         }
 
-        [Route("novo")]
+        [Route("[controller]/novo")]
         public IActionResult Create()
         {
             return View();
         }
 
-        [HttpPost("novo")]
+        [HttpPost("[controller]/novo")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Content")] PostModel postModel)
         {
@@ -155,7 +155,7 @@ namespace Blog.Web.Controllers
 
             return View(postModel);
         }
-        [Route("editar/{id:int}")]
+        [Route("[controller]/editar/{id:int}")]
         public async Task<IActionResult> Edit(int id)
         {
             var post = await _context.Posts.Include(p => p.Author)
@@ -177,7 +177,7 @@ namespace Blog.Web.Controllers
             });
         }
 
-        [HttpPost("editar/{id:int}")]
+        [HttpPost("[controller]/editar/{id:int}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,CreateDate")] PostModel postModel)
         {
@@ -224,7 +224,7 @@ namespace Blog.Web.Controllers
             return View(postModel);
         }
 
-        [Route("excluir/{id:int}")]
+        [Route("[controller]/excluir/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var post = await _context.Posts
@@ -246,7 +246,7 @@ namespace Blog.Web.Controllers
             });
         }
 
-        [HttpPost("excluir/{id:int}")]
+        [HttpPost("[controller]/excluir/{id:int}")]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

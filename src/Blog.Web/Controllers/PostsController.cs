@@ -26,8 +26,13 @@ namespace Blog.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            ViewData["AuthorId"] = authorId;
+
             var posts = await _context.Posts
                                       .Include(p => p.Author)
+                                      .Include(p => p.Comments)
                                       .OrderByDescending(p => p.CreateDate).ToListAsync();
 
             return View(posts.Select(p => new PostModel
@@ -42,18 +47,86 @@ namespace Blog.Web.Controllers
             }));
         }
 
-        [Route("detalhes/{id:int}")]
-        public async Task<IActionResult> Details(int id)
+        [Route("{id:int}/comments")]
+        public async Task<IActionResult> Comments(int id)
         {
             var post = await _context.Posts
-                .FirstOrDefaultAsync(m => m.Id == id);
+                                     .Include(p => p.Comments)
+                                     .Include(p => p.Author)
+                                     .FirstOrDefaultAsync(p => p.Id == id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            ViewData["AuthorId"] = authorId;
+            ViewData["PostId"] = post.Id;
+            
+            var comments = post.Comments.Select(p => new CommentModel
+                        {
+                            Id = p.Id,
+                            PostId = p.PostId,
+                            Content = p.Content,
+                            AuthorId = p.AuthorId,
+                            AuthorName = p.Author?.UserName!,
+                            CreateDate = p.CreateDate                            
+                        }).ToList();
+
+            return View(comments);
+        }
+
+        [Route("posts/{id:int}/novo-comentario")]
+        public async Task<IActionResult> CreateComment(int id)
+        {
+            var post = await _context.Posts
+                                     .Include(p => p.Comments)
+                                     .Include(p => p.Author)
+                                     .FirstOrDefaultAsync(p => p.Id == id);
+
+
             if (post == null)
             {
                 return NotFound();
             }
 
-            return View(post);
+            ViewData["PostId"] = post.Id;
+            return View();
         }
+
+        [HttpPost("posts/{id:int}/novo-comentario")]
+        public async Task<IActionResult> CreateComment([Bind("Content")] CommentModel commentModel, int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var post = await _context.Posts
+                                     .Include(p => p.Comments)
+                                     .Include(p => p.Author)
+                                     .FirstOrDefaultAsync(p => p.Id == id);
+
+                if (post == null)
+                {
+                    return NotFound();
+                }
+                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                post.Comments.Add(new Comment
+                {
+                    Content = commentModel.Content,
+                    PostId = id,
+                    CreateDate = DateTime.Now,
+                    AuthorId = authorId
+                });
+
+                _context.Update(post);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(commentModel);
+        }
+
         [Route("novo")]
         public IActionResult Create()
         {
@@ -66,14 +139,14 @@ namespace Blog.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 var post = new Post
                 {
                     Title = postModel.Title,
                     Content = postModel.Content,
                     CreateDate = postModel.CreateDate,
-                    AuthorId = userId
+                    AuthorId = authorId
                 };
 
                 _context.Add(post);

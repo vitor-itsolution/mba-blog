@@ -1,0 +1,41 @@
+@model IEnumerable<Blog.Web.Models.CommentModel>
+
+@{
+    ViewData["Title"] = "Comentários";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p style="padding: 20px 0px 20px 0px;">
+    @* <a asp-action="CreateComment" asp-route-id=@ViewBag.PostId class="btn btn-primary"><span class="fa fa-plus">
+    Novo</span></a> *@
+    <a asp-action="CreateComment" asp-route-id=@ViewBag.PostId class="btn btn-primary"><span class="fa fa-plus">
+            Novo</span></a>
+    <a asp-action="Index" class="btn btn-warning">Voltar</a>
+</p>
+
+@foreach (var item in Model)
+{
+    <div class="row">
+    <div class="col">
+        <span class="published">Data publicação @item.CreateDate.ToString("dd/MM/yyyy HH:mm:ss")</span>
+        @{
+                if (ViewBag.AuthorId == @item.AuthorId)
+                {
+                    <a class="btn" style="color: #dc3545;" asp-area="" asp-controller="Comments" asp-action="Delete" asp-route-id="@item.Id"><span
+                            class="fa fa-trash"></span></a>
+                }
+            }
+        </div>
+
+    </div>
+    <div class="row">
+    <span class="content">@item.Content</span>
+</div>
+    <br />
+    <hr />
+}
+
+<script>
+    <link rel="stylesheet" href="~/Posts/Index.cshtml.css" type="text/css">
+</script>

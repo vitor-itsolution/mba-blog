@@ -24,7 +24,7 @@
                     </div>
                     <div class="col">
                         @{
-                            if (@User.Identity?.Name == @item.AuthorName)
+                            if (ViewBag.AuthorId  == @item.AuthorId)
                             {
                                 <a class="btn btn-info" asp-action="Edit" asp-route-id="@item.Id"><span
                                         class="fa fa-pencil"></span></a>
@@ -32,7 +32,7 @@
 
                         }
                         @{
-                            if (@User.Identity?.Name == @item.AuthorName)
+                            if (ViewBag.AuthorId == @item.AuthorId)
                             {
                                 <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span
                                         class="fa fa-trash"></span></a>
@@ -46,7 +46,7 @@
                             <span class="published">Data publicação @item.CreateDate.ToString("dd/MM/yyyy HH:mm:ss")</span>
                         </div>
                         <div class="col">
-                            <a asp-action="Details" asp-route-id="@item.Id"><span
+                            <a asp-action="Comments" asp-route-id="@item.Id"><span
                                     class="published">@Html.DisplayFor(modelItem
                                 => item.AmountComment) Comentários</span></a>
                         </div>

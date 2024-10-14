@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
 using Blog.Data.Models;
+using Blog.Web.Models;
 
 namespace Blog.Web.Controllers
 {
@@ -27,9 +28,7 @@ namespace Blog.Web.Controllers
             {
                 return NotFound();
             }
-            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", comment.AuthorId);
-            ViewData["PostId"] = new SelectList(_context.Posts, "Id", "Content", comment.PostId);
-            return View(comment);
+            return View(new CommentModel());
         }
 
         [HttpPost]

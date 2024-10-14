@@ -8,26 +8,28 @@ namespace Blog.Data.Mappings
     {
         public void Configure(EntityTypeBuilder<Post> builder)
         {
-            builder.HasKey(p=> p.Id);
+            builder.HasKey(p => p.Id);
 
-            builder.Property(p=> p.Title)
+            builder.Property(p => p.Title)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(p=> p.Content)
+            builder.Property(p => p.Content)
                 .IsRequired()
                 .HasMaxLength(300);
 
-            builder.Property(p=> p.CreateDate);
+            builder.Property(p => p.CreateDate);
 
-            builder.HasOne(p => p.Author);
+            builder.HasOne(p => p.Author)
+                   .WithMany()
+                   .HasForeignKey(p => p.AuthorId);
 
             builder.HasMany(p => p.Comments)
                 .WithOne(p => p.Post)
                 .HasForeignKey(p => p.PostId);
 
             builder.ToTable("Posts");
-         
+
         }
     }
 }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Blog.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -19,7 +15,9 @@ namespace Blog.Data.Mappings
             .IsRequired()
             .HasMaxLength(300);
 
-            builder.HasOne(p => p.Author);
+            builder.HasOne(p => p.Author)
+            .WithMany()
+            .HasForeignKey(p => p.AuthorId);
 
             builder.ToTable("Comments");
         }

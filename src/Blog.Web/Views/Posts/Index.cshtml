@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Blog.Web.Models.PostModel>
+
+@{
+    ViewData["Title"] = "Blog do Vitão";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p style="padding: 20px 0px 20px 0px;">
+    <a asp-action="Create" class="btn btn-primary"><span class="fa fa-plus"> Novo</span></a>
+</p>
+
+@foreach (var item in Model)
+{
+    <div>
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="row">
+
+                <div class="row">
+                    <div class="col">
+                        <h3 class="title">@Html.DisplayFor(modelItem => item.Title)</h3>
+                    </div>
+                    <div class="col">
+                        @{
+                            if (@User.Identity?.Name == @item.AuthorName)
+                            {
+                                <a class="btn btn-info" asp-action="Edit" asp-route-id="@item.Id"><span
+                                        class="fa fa-pencil"></span></a>
+                            }
+
+                        }
+                        @{
+                            if (@User.Identity?.Name == @item.AuthorName)
+                            {
+                                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span
+                                        class="fa fa-trash"></span></a>
+                            }
+                        }
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <span class="published">Data publicação @item.CreateDate.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                        </div>
+                        <div class="col">
+                            <a asp-action="Details" asp-route-id="@item.Id"><span
+                                    class="published">@Html.DisplayFor(modelItem
+                                => item.AmountComment) Comentários</span></a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <span class="content">@Html.DisplayFor(modelItem => item.Content)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <hr />
+}

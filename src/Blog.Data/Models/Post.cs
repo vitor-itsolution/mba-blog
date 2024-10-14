@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Data.Models
 {
@@ -9,6 +8,7 @@ namespace Blog.Data.Models
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime CreateDate { get; set; } = DateTime.Now;
+        public string AuthorId { get; set; }
         public virtual IdentityUser Author { get; set; }
         public virtual ICollection<Comment> Comments { get; set; } = [];
     }

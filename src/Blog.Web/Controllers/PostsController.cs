@@ -148,7 +148,7 @@ namespace Blog.Web.Controllers
                     AuthorId = authorId
                 };
 
-                _context.Add(post);
+                _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -204,7 +204,7 @@ namespace Blog.Web.Controllers
                     post.CreateDate = DateTime.Now;
                     post.AuthorId = authorId;
 
-                    _context.Update(post);
+                    _context.Posts.Update(post);
                     await _context.SaveChangesAsync();
 
                 }

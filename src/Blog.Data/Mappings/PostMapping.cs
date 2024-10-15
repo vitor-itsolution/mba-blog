@@ -8,7 +8,10 @@ namespace Blog.Data.Mappings
     {
         public void Configure(EntityTypeBuilder<Post> builder)
         {
-            builder.HasKey(p => p.Id);
+
+            builder.Property(p=> p.Id)
+                    .UseIdentityColumn(seed: 1, increment: 1)
+                    .IsRequired();
 
             builder.Property(p => p.Title)
                 .IsRequired()

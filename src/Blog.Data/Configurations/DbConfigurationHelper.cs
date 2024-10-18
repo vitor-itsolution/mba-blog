@@ -44,9 +44,9 @@ namespace Blog.Data.Configurations
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "admin@teste.com",
-                NormalizedUserName = "admin@teste.com",
+                NormalizedUserName = "ADMIN@TESTE.COM",
                 Email = "admin@teste.com",
-                NormalizedEmail = "admin@teste.com",
+                NormalizedEmail = "ADMIN@TESTE.COM",
                 AccessFailedCount = 0,
                 LockoutEnabled = false,
                 PasswordHash = "AQAAAAIAAYagAAAAEFkrTUVXTAM0THUlCWfiDLuTiFRYu44h2ehK0R044VR8fQwB17N4dhXoJPybI5YZAg==",

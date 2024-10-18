@@ -49,7 +49,7 @@ namespace Blog.Data.Configurations
                 NormalizedEmail = "admin@teste.com",
                 AccessFailedCount = 0,
                 LockoutEnabled = false,
-                PasswordHash = "AQAAAAIAAYagAAAAEDJJlIL51tu89ACUTe1ibbmSmD6qfIi/ER2h+GyflM9njrA5fBcoFkxOAq0bkM03gA==", //Teste@1
+                PasswordHash = "AQAAAAIAAYagAAAAECURsIAzQVesdThx4rPP3e6cRRmG1MNxzQWVJ+5RBlVXRzRywG//phfwDJ6esW2bNw==",
                 TwoFactorEnabled = false,
                 ConcurrencyStamp = Guid.NewGuid().ToString(),
                 EmailConfirmed = true,

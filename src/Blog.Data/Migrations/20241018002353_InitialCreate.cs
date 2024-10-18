@@ -160,12 +160,11 @@ namespace Blog.Data.Migrations
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Content = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -181,12 +180,11 @@ namespace Blog.Data.Migrations
                 name: "Comments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PostId = table.Column<int>(type: "int", nullable: false)
+                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

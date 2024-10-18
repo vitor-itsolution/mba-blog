@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
-using Blog.Data.Models;
 using Blog.Web.Models;
 using System.Security.Claims;
 
@@ -17,8 +15,8 @@ namespace Blog.Web.Controllers
             _context = context;
         }
 
-        [Route("[controller]/editar/{id:int}")]
-        public async Task<IActionResult> Edit(int? id)
+        [Route("[controller]/editar/{id:Guid}")]
+        public async Task<IActionResult> Edit(Guid id)
         {
             var comment = await _context.Comments
                                            .Include(p => p.Author)
@@ -41,9 +39,9 @@ namespace Blog.Web.Controllers
             });
         }
 
-        [HttpPost("[controller]/editar/{id:int}")]
+        [HttpPost("[controller]/editar/{id:Guid}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Content")] CommentModel commentModel)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content")] CommentModel commentModel)
         {
             if (id != commentModel.Id)
             {
@@ -66,7 +64,7 @@ namespace Blog.Web.Controllers
                     comment.Content = commentModel.Content;
                     comment.CreateDate = DateTime.Now;
 
-                    _context.Update(comment);
+                    _context.Comments.Update(comment);
                     await _context.SaveChangesAsync();
 
                 }
@@ -86,13 +84,8 @@ namespace Blog.Web.Controllers
             return View(commentModel);
         }
 
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var comment = await _context.Comments
                 .Include(c => c.Author)
                 .Include(c => c.Post)
@@ -114,9 +107,10 @@ namespace Blog.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var comment = await _context.Comments.FindAsync(id);
+            
             if (comment == null)
             {
                 return NotFound();
@@ -134,7 +128,7 @@ namespace Blog.Web.Controllers
             return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
         }
 
-        private bool CommentExists(int id)
+        private bool CommentExists(Guid id)
         {
             return _context.Comments.Any(e => e.Id == id);
         }

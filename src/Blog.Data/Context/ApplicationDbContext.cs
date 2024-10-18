@@ -18,9 +18,14 @@ public class ApplicationDbContext : IdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+
+        foreach (var property in builder.Model.GetEntityTypes().SelectMany(
+                   e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
+            property.SetColumnType("varchar(1000)");
+
         builder.ApplyConfiguration(new PostMapping());
         builder.ApplyConfiguration(new CommentMapping());
-        
+
         base.OnModelCreating(builder);
     }
 }

@@ -239,10 +239,10 @@ namespace Blog.Web.Controllers
             });
         }
 
-        [HttpPost("[controller]/excluir/{id:int}")]
+        [HttpPost("[controller]/excluir/{id:Guid}")]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var post = await _context.Posts.FindAsync(id);
 

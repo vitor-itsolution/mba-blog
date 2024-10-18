@@ -8,9 +8,7 @@ namespace Blog.Data.Mappings
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
-            builder.Property(p => p.Id)
-                .UseIdentityColumn(seed: 1, increment: 1)
-                .IsRequired();
+            builder.HasKey(x => x.Id);
 
             builder.Property(p => p.Content)
             .IsRequired()

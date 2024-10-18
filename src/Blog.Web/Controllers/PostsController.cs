@@ -5,8 +5,6 @@ using Blog.Data.Models;
 using Blog.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using System.Security.Principal;
-using Microsoft.AspNetCore.Identity;
 
 namespace Blog.Web.Controllers
 {
@@ -45,8 +43,8 @@ namespace Blog.Web.Controllers
         }
 
         [AllowAnonymous]
-        [Route("[controller]/{id:int}/comments")]
-        public async Task<IActionResult> Comments(int id)
+        [Route("[controller]/{id:Guid}/comments")]
+        public async Task<IActionResult> Comments(Guid id)
         {
             var post = await _context.Posts
                                      .Include(p => p.Comments)
@@ -75,12 +73,10 @@ namespace Blog.Web.Controllers
             return View(comments);
         }
 
-        [Route("[controller]/{id:int}/novo-comentario")]
-        public async Task<IActionResult> CreateComment(int id)
+        [Route("[controller]/{id:Guid}/novo-comentario")]
+        public async Task<IActionResult> CreateComment(Guid id)
         {
             var post = await _context.Posts
-                                     .Include(p => p.Comments)
-                                     .Include(p => p.Author)
                                      .FirstOrDefaultAsync(p => p.Id == id);
 
 
@@ -93,31 +89,28 @@ namespace Blog.Web.Controllers
             return View();
         }
 
-        [HttpPost("[controller]/{id:int}/novo-comentario")]
-        public async Task<IActionResult> CreateComment([Bind("Content")] CommentModel commentModel, int id)
+        [HttpPost("[controller]/{id:Guid}/novo-comentario")]
+        public async Task<IActionResult> CreateComment([Bind("Content")] CommentModel commentModel, Guid id)
         {
             if (ModelState.IsValid)
             {
-                var post = await _context.Posts
-                                     .Include(p => p.Comments)
-                                     .Include(p => p.Author)
-                                     .FirstOrDefaultAsync(p => p.Id == id);
+                var post = await _context.Posts.FindAsync(id);
 
                 if (post == null)
                 {
                     return NotFound();
                 }
+
                 var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                post.Comments.Add(new Comment
+                _context.Comments.Add(new Comment
                 {
                     Content = commentModel.Content,
                     PostId = id,
                     CreateDate = DateTime.Now,
                     AuthorId = authorId
                 });
-
-                _context.Update(post);
+                
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -155,8 +148,8 @@ namespace Blog.Web.Controllers
 
             return View(postModel);
         }
-        [Route("[controller]/editar/{id:int}")]
-        public async Task<IActionResult> Edit(int id)
+        [Route("[controller]/editar/{id:Guid}")]
+        public async Task<IActionResult> Edit(Guid id)
         {
             var post = await _context.Posts.Include(p => p.Author)
                                            .FirstOrDefaultAsync(p => p.Id == id);
@@ -177,9 +170,9 @@ namespace Blog.Web.Controllers
             });
         }
 
-        [HttpPost("[controller]/editar/{id:int}")]
+        [HttpPost("[controller]/editar/{id:Guid}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,CreateDate")] PostModel postModel)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Content,CreateDate")] PostModel postModel)
         {
             if (id != postModel.Id)
             {
@@ -224,8 +217,8 @@ namespace Blog.Web.Controllers
             return View(postModel);
         }
 
-        [Route("[controller]/excluir/{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        [Route("[controller]/excluir/{id:Guid}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             var post = await _context.Posts
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -270,7 +263,7 @@ namespace Blog.Web.Controllers
             return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
         }
 
-        private bool PostExists(int id)
+        private bool PostExists(Guid id)
         {
             return _context.Posts.Any(e => e.Id == id);
         }

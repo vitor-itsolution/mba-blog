@@ -5,8 +5,8 @@ namespace Blog.Web.Models
     public class CommentModel
     {
         [Key]
-        public int Id { get; set; }
-        public int PostId { get; set; }
+        public Guid Id { get; set; }
+        public Guid PostId { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Comentário")]

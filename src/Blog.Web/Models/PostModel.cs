@@ -5,7 +5,7 @@ namespace Blog.Web.Models
     public class PostModel
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Titulo")]

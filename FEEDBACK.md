@@ -12,16 +12,16 @@
 ## Pontos Negativos:
 
 - A entidade autor não existe, deveria atuar em conjunto com o user (Identity)
--   Eu não tenho uma entidade autor.
+  -   Eu não tenho uma entidade autor.
 - Existem maneiras mais elegantes de obter o usuário do identity e utilizar seus dados.
--   Vou pesquisar.
+  -   Vou pesquisar.
 - A camada "Data" poderia virar "Core" e receber serviços de aplicação para evitar a duplicação e repetição de código comum na API e Web.
--   Usei a estrutura solicitada na documentação da atividade.
+  -   Usei a estrutura solicitada na documentação da atividade.
 - A camada de API não está implementada
 - A interface poderia ser melhor, não consigo clicar num post e visualizar detalhes
--   Nao entendi. O post é exibido completao na como se fosse um card. O clique é somente para visualizar pos comentários
+  -   Nao entendi. O post é exibido completao na como se fosse um card. O clique é somente para visualizar pos comentários
 - Não consigo postar algo maior que 300 caracteres
--   Eu limitei.
+  -   Eu limitei.
 
 ## Sugestões:
 

@@ -19,7 +19,7 @@
   -   Usei a estrutura solicitada na documentação da atividade.
 - A camada de API não está implementada
 - A interface poderia ser melhor, não consigo clicar num post e visualizar detalhes
-  -   Nao entendi. O post é exibido completao na como se fosse um card. O clique é somente para visualizar pos comentários
+  -   Nao entendi. O post é exibido completo, como se fosse um card. O clique é somente para visualizar pos comentários
 - Não consigo postar algo maior que 300 caracteres
   -   Eu limitei.
 

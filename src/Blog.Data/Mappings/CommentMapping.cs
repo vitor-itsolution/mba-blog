@@ -12,7 +12,7 @@ namespace Blog.Data.Mappings
 
             builder.Property(p => p.Content)
             .IsRequired()
-            .HasMaxLength(300);
+            .HasMaxLength(1000);
 
             builder.HasOne(p => p.Author)
             .WithMany()

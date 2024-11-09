@@ -14,7 +14,8 @@ namespace Blog.Core.Configurations
     {
         public static IServiceCollection AddServicesConfigurations(this IServiceCollection services)
         {
-            return services.AddServices();
+            return services.AddServices()
+                           .AddHttpContextAccessor();
         }
 
         public static WebApplication AddWebApplicationConfigurations(this WebApplication app)

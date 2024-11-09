@@ -17,12 +17,12 @@ namespace Blog.Core.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<CommentModel> GetById(Guid id)
+        public async Task<CommentModel> GetById(string id)
         {
             var comment = await _context.Comments
                                .Include(p => p.Author)
                                .Include(p => p.Post)
-                               .FirstOrDefaultAsync(p => p.Id == id);
+                               .FirstOrDefaultAsync(p => p.Id == id.ToString());
 
             return new CommentModel
             {
@@ -35,7 +35,7 @@ namespace Blog.Core.Services
             };
         }
 
-        public async Task<CommentModel> Update(Guid commentId, CommentModel commentModel)
+        public async Task<CommentModel> Update(string commentId, CommentModel commentModel)
         {
             if (!await CommentExists(commentModel.Id))
                 return null;
@@ -59,7 +59,7 @@ namespace Blog.Core.Services
 
         }
 
-        public async Task<Guid?> Delete(Guid id)
+        public async Task<string> Delete(string id)
         {
             var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -79,7 +79,7 @@ namespace Blog.Core.Services
             return id;
         }
 
-        public async Task<bool> CommentExists(Guid commentId)
+        public async Task<bool> CommentExists(string commentId)
            => await _context.Comments.AnyAsync(p => p.Id == commentId);
     }
 }

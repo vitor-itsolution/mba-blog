@@ -17,8 +17,8 @@ namespace Blog.Web.Controllers
             _logger = logger;
         }
 
-        [Route("[controller]/editar/{id:Guid}")]
-        public async Task<IActionResult> Edit(Guid id)
+        [Route("[controller]/editar/{id}")]
+        public async Task<IActionResult> Edit(string id)
         {
 
             if (!await _commentService.CommentExists(id))
@@ -29,9 +29,9 @@ namespace Blog.Web.Controllers
             return View(await _commentService.GetById(id));
         }
 
-        [HttpPost("[controller]/editar/{id:Guid}")]
+        [HttpPost("[controller]/editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Content")] CommentModel commentModel)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Content")] CommentModel commentModel)
         {
             if (id != commentModel.Id)
             {
@@ -64,7 +64,7 @@ namespace Blog.Web.Controllers
             return View(commentModel);
         }
 
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (!await _commentService.CommentExists(id))
             {
@@ -75,7 +75,7 @@ namespace Blog.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
             try
             {

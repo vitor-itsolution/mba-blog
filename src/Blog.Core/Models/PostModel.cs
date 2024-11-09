@@ -5,7 +5,7 @@ namespace Blog.Core.Models
     public class PostModel
     {
         [Key]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Titulo")]
@@ -21,10 +21,10 @@ namespace Blog.Core.Models
         [DataType(DataType.DateTime, ErrorMessage = "O campo {0} não está em formato incorreto")]
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
-        public Guid AuthorId { get; set; }
+        public string AuthorId { get; set; }
 
         [Display(Name = "Autor")]
-        public string AuthorName  { get; set; }
+        public string AuthorName { get; set; }
 
         [Display(Name = "Comentários")]
         public int AmountComment { get; set; }

@@ -20,7 +20,8 @@ namespace Blog.Data.Mappings
 
             builder.HasOne(p => p.User)
                    .WithOne()
-                   .HasForeignKey("Id");
+                   .HasForeignKey<Author>(p=> p.Id)
+                   .IsRequired();
 
             builder.ToTable("Authors");
         }

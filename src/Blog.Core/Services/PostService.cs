@@ -37,14 +37,14 @@ namespace Blog.Core.Services
             });
         }
 
-        public async Task<PostModel> GetById(Guid id)
+        public async Task<PostModel> GetById(string id)
         {
             if (!await PostExists(id))
                 return null;
 
             var post = await _context.Posts
                               .Include(p => p.Author)
-                              .FirstOrDefaultAsync(p => p.Id == id);
+                              .FirstOrDefaultAsync(p => p.Id == id.ToString());
 
             return new PostModel
             {
@@ -57,7 +57,7 @@ namespace Blog.Core.Services
             };
         }
 
-        public async Task<IEnumerable<CommentModel>> GetPostComments(Guid id)
+        public async Task<IEnumerable<CommentModel>> GetPostComments(string id)
         {
 
             if (!await PostExists(id))
@@ -85,7 +85,7 @@ namespace Blog.Core.Services
                 Title = post.Title,
                 Content = post.Content,
                 CreateDate = post.CreateDate,
-                AuthorId = Guid.Parse(authorId)
+                AuthorId = authorId
             });
 
             await _context.SaveChangesAsync();
@@ -93,9 +93,9 @@ namespace Blog.Core.Services
             return post;
         }
 
-        public async Task<PostModel> Update(Guid id, PostModel postModel)
+        public async Task<PostModel> Update(string id, PostModel postModel)
         {
-            var authorId = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var post = await _context.Posts.FindAsync(postModel.Id);
 
@@ -115,9 +115,9 @@ namespace Blog.Core.Services
             return postModel;
         }
 
-        public async Task<Guid?> Delete(Guid id)
+        public async Task<string> Delete(string id)
         {
-            var authorId = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!await PostExists(id))
                 return null;
@@ -135,7 +135,7 @@ namespace Blog.Core.Services
             return id;
         }
 
-        public async Task<CommentModel> CreatePostComment(Guid postId, CommentModel comment)
+        public async Task<CommentModel> CreatePostComment(string postId, CommentModel comment)
         {
             if (!await PostExists(postId))
                 return null;
@@ -155,7 +155,7 @@ namespace Blog.Core.Services
             return comment;
         }
 
-        public async Task<bool> PostExists(Guid postId)
+        public async Task<bool> PostExists(string postId)
             => await _context.Posts.AnyAsync(p => p.Id == postId);
     }
 }

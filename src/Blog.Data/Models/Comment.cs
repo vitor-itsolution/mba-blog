@@ -5,7 +5,7 @@ namespace Blog.Data.Models
         public string AuthorId { get; set; }
         public virtual Author Author { get; set; }
         public string Content { get; set; }
-        public Guid PostId { get; set; }
+        public string PostId { get; set; }
         public virtual Post Post { get; set; }
     }
 }

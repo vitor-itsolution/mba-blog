@@ -1,4 +1,5 @@
 using Blog.Data.Context;
+using Blog.Data.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -67,6 +68,12 @@ namespace Blog.Data.Configurations
             await context.Roles.AddAsync(role);
             await context.Users.AddAsync(user);
             await context.UserRoles.AddAsync(userRole);
+            
+            await context.Authors.AddAsync(new Author{
+                Id = user.Id,
+                Name = "Administrator",
+                Email = user.Email
+            });
 
             await context.SaveChangesAsync();
 

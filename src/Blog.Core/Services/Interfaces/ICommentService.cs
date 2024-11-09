@@ -4,9 +4,9 @@ namespace Blog.Core.Services.Interfaces
 {
     public interface ICommentService
     {
-        Task<CommentModel> GetById(Guid id);
-        Task<CommentModel> Update(Guid commentId, CommentModel commentModel);
-        Task<Guid?> Delete(Guid id);
-        Task<bool> CommentExists(Guid commentId);
+        Task<CommentModel> GetById(string id);
+        Task<CommentModel> Update(string commentId, CommentModel commentModel);
+        Task<string> Delete(string id);
+        Task<bool> CommentExists(string commentId);
     }
 }

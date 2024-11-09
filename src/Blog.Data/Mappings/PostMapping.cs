@@ -22,12 +22,8 @@ namespace Blog.Data.Mappings
             builder.Property(p => p.CreateDate);
 
             builder.HasOne(p => p.Author)
-                   .WithMany()
+                   .WithMany(p => p.Posts)
                    .HasForeignKey(p => p.AuthorId);
-
-            builder.HasMany(p => p.Comments)
-                .WithOne(p => p.Post)
-                .HasForeignKey(p => p.PostId);
 
             builder.ToTable("Posts");
 

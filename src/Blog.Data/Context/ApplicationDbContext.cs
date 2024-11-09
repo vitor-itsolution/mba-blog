@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext
 
         builder.ApplyConfiguration(new PostMapping());
         builder.ApplyConfiguration(new CommentMapping());
+        builder.ApplyConfiguration(new AuthorMapping());
 
         base.OnModelCreating(builder);
     }

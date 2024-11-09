@@ -32,8 +32,8 @@ namespace Blog.Core.Services
                 Content = p.Content,
                 CreateDate = p.CreateDate,
                 AmountComment = p.Comments.Count(),
-                AuthorId = p.Author?.Id!,
-                AuthorName = p.Author?.UserName!
+                AuthorId = p.Author.Id,
+                AuthorName = p.Author?.Name!
             });
         }
 
@@ -51,7 +51,7 @@ namespace Blog.Core.Services
                 Id = post.Id,
                 Title = post.Title,
                 AuthorId = post.AuthorId,
-                AuthorName = post.Author.UserName,
+                AuthorName = post.Author.Name,
                 Content = post.Content,
                 CreateDate = post.CreateDate
             };
@@ -71,7 +71,7 @@ namespace Blog.Core.Services
                 PostId = p.PostId,
                 Content = p.Content,
                 AuthorId = p.AuthorId,
-                AuthorName = p.Author?.UserName!,
+                AuthorName = p.Author?.Name!,
                 CreateDate = p.CreateDate
             });
         }
@@ -85,7 +85,7 @@ namespace Blog.Core.Services
                 Title = post.Title,
                 Content = post.Content,
                 CreateDate = post.CreateDate,
-                AuthorId = authorId
+                AuthorId = Guid.Parse(authorId)
             });
 
             await _context.SaveChangesAsync();
@@ -95,7 +95,7 @@ namespace Blog.Core.Services
 
         public async Task<PostModel> Update(Guid id, PostModel postModel)
         {
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var authorId = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var post = await _context.Posts.FindAsync(postModel.Id);
 
@@ -117,7 +117,7 @@ namespace Blog.Core.Services
 
         public async Task<Guid?> Delete(Guid id)
         {
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var authorId = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             if (!await PostExists(id))
                 return null;

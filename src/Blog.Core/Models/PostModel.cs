@@ -21,7 +21,7 @@ namespace Blog.Core.Models
         [DataType(DataType.DateTime, ErrorMessage = "O campo {0} não está em formato incorreto")]
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
-        public string AuthorId { get; set; }
+        public Guid AuthorId { get; set; }
 
         [Display(Name = "Autor")]
         public string AuthorName  { get; set; }

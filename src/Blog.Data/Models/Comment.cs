@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 namespace Blog.Data.Models
 {
     public class Comment : ModelBase

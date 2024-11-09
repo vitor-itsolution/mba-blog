@@ -28,7 +28,7 @@ namespace Blog.Core.Services
             {
                 Id = comment.Id,
                 AuthorId = comment.AuthorId,
-                AuthorName = comment.Author.UserName,
+                AuthorName = comment.Author.Name,
                 Content = comment.Content,
                 CreateDate = comment.CreateDate,
                 PostId = comment.Post.Id

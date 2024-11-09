@@ -7,7 +7,6 @@ namespace Blog.Api.Controllers
     public class PostsController : ControllerBase
     {
         private readonly ILogger<PostsController> _logger;
-
         public PostsController(ILogger<PostsController> logger)
         {
             _logger = logger;

@@ -1,8 +1,11 @@
+using Blog.Core.Configurations;
 using Blog.Data.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDatabaseSelector();
+
+builder.Services.AddServicesConfigurations();
 
 builder.Services.AddControllersWithViews();
 
@@ -30,6 +33,6 @@ app.MapControllerRoute(
     pattern: "{controller=Posts}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-app.UseDbMigrationHelper();
+app.AddWebApplicationConfigurations();
 
 app.Run();

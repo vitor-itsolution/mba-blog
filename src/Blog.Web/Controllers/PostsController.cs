@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
 using Blog.Data.Models;
-using Blog.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Blog.Core.Models;
 
 namespace Blog.Web.Controllers
 {

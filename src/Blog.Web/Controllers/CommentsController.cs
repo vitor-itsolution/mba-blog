@@ -1,42 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Blog.Data.Context;
-using System.Security.Claims;
 using Blog.Core.Models;
+using Blog.Core.Services.Interfaces;
+using System.Text.Json;
 
 namespace Blog.Web.Controllers
 {
     public class CommentsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICommentService _commentService;
+        private readonly ILogger<CommentsController> _logger;
 
-        public CommentsController(ApplicationDbContext context)
+        public CommentsController(ICommentService commentService, ILogger<CommentsController> logger)
         {
-            _context = context;
+            _commentService = commentService;
+            _logger = logger;
         }
 
         [Route("[controller]/editar/{id:Guid}")]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var comment = await _context.Comments
-                                           .Include(p => p.Author)
-                                           .Include(p => p.Post)
-                                           .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (comment == null)
+            if (!await _commentService.CommentExists(id))
             {
                 return NotFound();
             }
 
-            return View(new CommentModel
-            {
-                Id = comment.Id,
-                AuthorId = comment.AuthorId,
-                AuthorName = comment.Author.UserName,
-                Content = comment.Content,
-                CreateDate = comment.CreateDate,
-                PostId = comment.Post.Id
-            });
+            return View(await _commentService.GetById(id));
         }
 
         [HttpPost("[controller]/editar/{id:Guid}")]
@@ -52,25 +42,15 @@ namespace Blog.Web.Controllers
             {
                 try
                 {
-                    var comment = await _context.Comments.FindAsync(commentModel.Id);
-
-                    var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                    if (comment.AuthorId != authorId && !User.IsInRole("Admin"))
-                    {
-                        return Forbid();
-                    }
-
-                    comment.Content = commentModel.Content;
-                    comment.CreateDate = DateTime.Now;
-
-                    _context.Comments.Update(comment);
-                    await _context.SaveChangesAsync();
-
+                    await _commentService.Update(id, commentModel);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Forbid();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(commentModel.Id))
+                    if (!await _commentService.CommentExists(id))
                     {
                         return NotFound();
                     }
@@ -86,51 +66,39 @@ namespace Blog.Web.Controllers
 
         public async Task<IActionResult> Delete(Guid id)
         {
-            var comment = await _context.Comments
-                .Include(c => c.Author)
-                .Include(c => c.Post)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (comment == null)
+            if (!await _commentService.CommentExists(id))
             {
                 return NotFound();
             }
-
-            return View(new CommentModel
-            {
-                Id = comment.Id,
-                PostId = comment.PostId,
-                AuthorId = comment.AuthorId,
-                Content = comment.Content
-            });
+            return View(await _commentService.GetById(id));
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var comment = await _context.Comments.FindAsync(id);
-            
-            if (comment == null)
+            try
             {
-                return NotFound();
+                if (!await _commentService.CommentExists(id))
+                {
+                    return NotFound();
+                }
+
+                await _commentService.Delete(id);
+
+                return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
             }
-
-            var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (comment.AuthorId != authorId && !User.IsInRole("Admin"))
+            catch (UnauthorizedAccessException ex)
             {
+                _logger.LogError(JsonSerializer.Serialize(ex));
                 return Forbid();
             }
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
+            catch (Exception ex)
+            {
+                _logger.LogError(JsonSerializer.Serialize(ex));
+                return View("Ocorreu um erro ao processar a solicitação, tente novamente mais tarde");
+            }
 
-            return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
-        }
-
-        private bool CommentExists(Guid id)
-        {
-            return _context.Comments.Any(e => e.Id == id);
         }
     }
 }

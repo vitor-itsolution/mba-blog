@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data.Context;
-using Blog.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
+using System.Text.Json;
 
 namespace Blog.Web.Controllers
 {
@@ -13,13 +13,13 @@ namespace Blog.Web.Controllers
 
     public class PostsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IPostService _postService;
+        private readonly ILogger<PostsController> _Logger;
 
-        public PostsController(ApplicationDbContext context, IPostService postService)
+        public PostsController(ApplicationDbContext context, IPostService postService, ILogger<PostsController> logger)
         {
-            _context = context;
             _postService = postService;
+            _Logger = logger;
         }
 
         [AllowAnonymous]
@@ -121,7 +121,11 @@ namespace Blog.Web.Controllers
             {
                 try
                 {
-                    await _postService.Update(postModel);
+                    await _postService.Update(id, postModel);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Forbid();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -148,7 +152,7 @@ namespace Blog.Web.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts.FirstOrDefaultAsync(m => m.Id == id);
+            var post = await _postService.GetById(id);
 
             return View(new PostModel
             {
@@ -157,7 +161,7 @@ namespace Blog.Web.Controllers
                 Content = post.Content,
                 CreateDate = post.CreateDate,
                 AuthorId = post.AuthorId,
-                AuthorName = post.Author?.UserName
+                // AuthorName = post.Author?.UserName
             });
         }
 
@@ -166,16 +170,28 @@ namespace Blog.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var post = await _context.Posts.FindAsync(id);
-
-            if (!await _postService.PostExists(id))
+            try
             {
-                return NotFound();
+                if (!await _postService.PostExists(id))
+                {
+                    return NotFound();
+                }
+
+                await _postService.Delete(id);
+
+                return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _Logger.LogError(JsonSerializer.Serialize(ex));
+                return View("Error", $"Permissão negada");
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(JsonSerializer.Serialize(ex));
+                return View("Ocorreu um erro ao processar a solicitação, tente novamente mais tarde");
             }
 
-            await _postService.Delete(id);
-
-            return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
         }
     }
 }

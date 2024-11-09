@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Blog.Data.Context;
@@ -98,13 +93,13 @@ namespace Blog.Core.Services
             return post;
         }
 
-        public async Task<PostModel> Update(PostModel postModel)
+        public async Task<PostModel> Update(Guid id, PostModel postModel)
         {
             var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var post = await _context.Posts.FindAsync(postModel.Id);
 
-            if (post.AuthorId != authorId && !_httpContextAccessor.HttpContext.User.IsInRole("Admin"))
+            if (post.AuthorId != authorId && !_httpContextAccessor.HttpContext.User.IsInRole("Admin") || id != postModel.Id)
             {
                 throw new UnauthorizedAccessException();
             }

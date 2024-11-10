@@ -16,8 +16,7 @@ namespace Blog.Core.Configurations
 
         public static WebApplication AddWebApplicationConfigurations(this WebApplication app)
         {
-            app.UseDbMigrationHelper();
-
+            DbConfigurationHelper.EnsureSeedData(app).Wait();
             return app;
         }
 
@@ -26,13 +25,9 @@ namespace Blog.Core.Configurations
         {
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
-        }
-
-        private static void UseDbMigrationHelper(this WebApplication app)
-        {
-            DbConfigurationHelper.EnsureSeedData(app).Wait();
         }
     }
 }

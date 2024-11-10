@@ -56,11 +56,11 @@ namespace Blog.Web.Controllers
             }
 
             ViewData["PostId"] = id;
-            return View();
+            return View(new CommentModel { PostId = id });
         }
 
         [HttpPost("[controller]/{id}/novo-comentario")]
-        public async Task<IActionResult> CreateComment([Bind("Content")] CommentModel commentModel, string id)
+        public async Task<IActionResult> CreateComment([Bind("Content, PostId")] CommentModel commentModel, string id)
         {
             if (ModelState.IsValid)
             {

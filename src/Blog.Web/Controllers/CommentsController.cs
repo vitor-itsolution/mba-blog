@@ -35,8 +35,11 @@ namespace Blog.Web.Controllers
         {
             if (id != commentModel.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
+
+            if (!await _commentService.CommentExists(id))
+                return NotFound();
 
             if (ModelState.IsValid)
             {

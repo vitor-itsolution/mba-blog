@@ -7,7 +7,11 @@ builder.AddDatabaseSelector();
 
 builder.Services.AddServicesConfigurations();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                });
 
 var app = builder.Build();
 

@@ -23,7 +23,8 @@ namespace Blog.Core.Services
             var posts = await _context.Posts
                           .Include(p => p.Author)
                           .Include(p => p.Comments)
-                          .OrderByDescending(p => p.CreateDate).ToListAsync();
+                          .OrderByDescending(p => p.CreateDate)
+                          .AsNoTracking().ToListAsync();
 
             return posts?.Select(p => new PostModel
             {
@@ -108,8 +109,8 @@ namespace Blog.Core.Services
             post.Content = postModel.Content;
             post.CreateDate = DateTime.Now;
             post.AuthorId = authorId;
-
-            _context.Posts.Update(post);
+            
+            _context.Entry(post).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return postModel;

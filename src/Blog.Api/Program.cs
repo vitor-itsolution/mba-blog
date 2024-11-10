@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.AddDatabaseSelector();
+builder.AddJwtConfigurations();
+
 builder.Services.AddServicesConfigurations();
 
 builder.Services.AddEndpointsApiExplorer();

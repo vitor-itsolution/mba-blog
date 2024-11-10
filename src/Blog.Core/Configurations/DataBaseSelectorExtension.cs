@@ -30,6 +30,12 @@ namespace Blog.Core.Configurations
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        }
+
+        public static void AddJwtConfigurations(this WebApplicationBuilder builder)
+        {
             var JwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
             builder.Services.Configure<JwtSettings>(JwtSettingsSection);
 
@@ -52,9 +58,6 @@ namespace Blog.Core.Configurations
                     ValidIssuer = jwtSettings.Issuer
                 };
             });
-
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
         }
     }
 }

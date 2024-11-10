@@ -25,6 +25,8 @@ namespace Blog.Api.Controllers
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
+            if (await _authService.AuthorExists(registerUser.Email)) return Problem("E-mail já cadastrado");
+
             var token = await _authService.Register(registerUser);
 
             if (string.IsNullOrWhiteSpace(token))

@@ -7,6 +7,7 @@ using Blog.Core.Services.Interfaces;
 using Blog.Data.Context;
 using Blog.Data.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -31,6 +32,9 @@ namespace Blog.Core.Services
         {
             string accessToken = string.Empty;
 
+            if (await AuthorExists(registerUser.Email))
+                throw new Exception("Usuário já cadastrado");
+
             var user = new IdentityUser
             {
                 UserName = registerUser.Email,
@@ -50,6 +54,30 @@ namespace Blog.Core.Services
             return accessToken;
         }
 
+        public async Task<IdentityResult> RegisterUserMvc(RegisterUserViewModel registerUser)
+        {
+
+            if (await AuthorExists(registerUser.Email))
+                throw new Exception("Usuário já cadastrado");
+
+            var user = new IdentityUser
+            {
+                UserName = registerUser.Email,
+                Email = registerUser.Email,
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(user, registerUser.Password);
+
+            if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, false);
+                await CreateAuthor(registerUser, user);
+            }
+
+            return result;
+        }
+
         public async Task<string> Login(LoginUserViewModel loginUser)
         {
             var accessToken = string.Empty;
@@ -61,6 +89,11 @@ namespace Blog.Core.Services
             }
 
             return accessToken;
+        }
+
+        public async Task<bool> AuthorExists(string email)
+        {
+            return await _applicationDbContext.Authors.AnyAsync(p => p.Email == email);
         }
 
         private async Task CreateAuthor(RegisterUserViewModel registerUser, IdentityUser user)

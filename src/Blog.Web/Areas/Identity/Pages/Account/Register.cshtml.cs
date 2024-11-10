@@ -117,16 +117,20 @@ namespace Blog.Web.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= Url.Content("/Identity/Account/Login");
+
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                if (await _authService.AuthorExists(Input.Email))
+                {
+                    ModelState.AddModelError(string.Empty, "E-mail já cadastrado");
+                    return Page();
+                }
+
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-                var token = await _authService.Register(new Core.Models.RegisterUserViewModel
+                var result = await _authService.RegisterUserMvc(new Core.Models.RegisterUserViewModel
                 {
                     Name = Input.Name,
                     Email = Input.Email,
@@ -135,12 +139,10 @@ namespace Blog.Web.Areas.Identity.Pages.Account
 
                 });
 
-                if (!string.IsNullOrWhiteSpace(token))
+                if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                    return LocalRedirect(returnUrl);
                 }
                 else
                 {
@@ -148,7 +150,6 @@ namespace Blog.Web.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 

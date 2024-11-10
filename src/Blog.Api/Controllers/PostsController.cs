@@ -1,10 +1,12 @@
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PostsController : ControllerBase
@@ -17,28 +19,25 @@ namespace Blog.Api.Controllers
             _postService = postService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
         public async Task<IActionResult> Get()
         {
-            var posts = await _postService.Get();
-
-            if (!posts.Any())
-                return NotFound();
-
-            return Ok(posts);
+            return Ok(await _postService.Get());
         }
-
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Post(PostModel postModel)
+        public async Task<IActionResult> Post(CreatePostViewModel postViewModel)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
+
+            var postModel = new PostModel { Title = postViewModel.Title, Content = postViewModel.Content };
 
             await _postService.Create(postModel);
 
@@ -93,7 +92,7 @@ namespace Blog.Api.Controllers
 
             return Ok();
         }
-
+        [AllowAnonymous]
         [HttpGet("{id}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -108,7 +107,7 @@ namespace Blog.Api.Controllers
 
         [HttpPost("{id}/comments")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
         public async Task<IActionResult> PostComments([FromRoute] string id, [FromBody] CommentModel commentModel)

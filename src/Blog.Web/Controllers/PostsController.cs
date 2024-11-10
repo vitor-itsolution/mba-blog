@@ -85,7 +85,7 @@ namespace Blog.Web.Controllers
 
         [HttpPost("[controller]/novo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Content")] PostModel postModel)
+        public async Task<IActionResult> Create([Bind("Title,Content")] PostModel postModel)
         {
             if (ModelState.IsValid)
             {

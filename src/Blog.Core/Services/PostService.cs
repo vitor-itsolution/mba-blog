@@ -33,7 +33,7 @@ namespace Blog.Core.Services
                 Content = p.Content,
                 CreateDate = p.CreateDate,
                 AmountComment = p.Comments.Count(),
-                AuthorId = p.Author.Id,
+                AuthorId = p.Author?.Id,
                 AuthorName = p.Author?.Name!
             });
         }
@@ -80,6 +80,7 @@ namespace Blog.Core.Services
         public async Task<PostModel> Create(PostModel postModel)
         {
             var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var author = await _context.Authors.FindAsync(authorId);
 
             var post = new Post
             {
@@ -93,6 +94,8 @@ namespace Blog.Core.Services
             await _context.SaveChangesAsync();
 
             postModel.Id = post.Id;
+            postModel.AuthorId = author.Id;
+            postModel.AuthorName = author.Name;
 
             return postModel;
         }
@@ -156,7 +159,7 @@ namespace Blog.Core.Services
                 CreateDate = DateTime.Now,
                 AuthorId = authorId
             };
-            
+
             _context.Comments.Add(comment);
 
             await _context.SaveChangesAsync();

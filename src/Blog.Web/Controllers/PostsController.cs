@@ -16,7 +16,7 @@ namespace Blog.Web.Controllers
         private readonly IPostService _postService;
         private readonly ILogger<PostsController> _Logger;
 
-        public PostsController(ApplicationDbContext context, IPostService postService, ILogger<PostsController> logger)
+        public PostsController(IPostService postService, ILogger<PostsController> logger)
         {
             _postService = postService;
             _Logger = logger;

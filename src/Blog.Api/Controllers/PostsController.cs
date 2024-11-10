@@ -2,8 +2,6 @@ using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
-using System.Runtime.ConstrainedExecution;
 
 namespace Blog.Api.Controllers
 {

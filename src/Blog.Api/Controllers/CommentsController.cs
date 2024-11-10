@@ -2,7 +2,6 @@ using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
 
 namespace Blog.Api.Controllers
 {

@@ -3,6 +3,7 @@ using Blog.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using System.Runtime.ConstrainedExecution;
 
 namespace Blog.Api.Controllers
 {
@@ -43,7 +44,7 @@ namespace Blog.Api.Controllers
 
             await _postService.Create(postModel);
 
-            return Created();
+            return CreatedAtAction(nameof(Post), new { id = postModel.Id }, postModel);
         }
 
         [HttpPut("{id}")]
@@ -105,6 +106,27 @@ namespace Blog.Api.Controllers
                 return NotFound();
 
             return Ok(await _postService.GetPostComments(id));
+        }
+
+        [HttpPost("{id}/comments")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> PostComments([FromRoute] string id, [FromBody] CommentModel commentModel)
+        {
+            if (!await _postService.PostExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            if (id != commentModel.PostId)
+                return BadRequest();
+
+            await _postService.CreatePostComment(id, commentModel);
+
+            return CreatedAtAction(nameof(PostComments), new { id = commentModel.Id }, commentModel);
         }
     }
 }

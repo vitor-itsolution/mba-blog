@@ -77,21 +77,24 @@ namespace Blog.Core.Services
             });
         }
 
-        public async Task<PostModel> Create(PostModel post)
+        public async Task<PostModel> Create(PostModel postModel)
         {
             var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            _context.Posts.Add(new Post
+            var post = new Post
             {
-                Title = post.Title,
-                Content = post.Content,
-                CreateDate = post.CreateDate,
+                Title = postModel.Title,
+                Content = postModel.Content,
+                CreateDate = postModel.CreateDate,
                 AuthorId = authorId
-            });
+            };
 
+            _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            return post;
+            postModel.Id = post.Id;
+
+            return postModel;
         }
 
         public async Task<PostModel> Update(string id, PostModel postModel)
@@ -109,7 +112,7 @@ namespace Blog.Core.Services
             post.Content = postModel.Content;
             post.CreateDate = DateTime.Now;
             post.AuthorId = authorId;
-            
+
             _context.Entry(post).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
@@ -136,24 +139,31 @@ namespace Blog.Core.Services
             return id;
         }
 
-        public async Task<CommentModel> CreatePostComment(string postId, CommentModel comment)
+        public async Task<CommentModel> CreatePostComment(string postId, CommentModel commentModel)
         {
             if (!await PostExists(postId))
                 return null;
 
+            if (postId != commentModel.PostId)
+                throw new UnauthorizedAccessException();
+
             var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            _context.Comments.Add(new Comment
+            var comment = new Comment
             {
-                Content = comment.Content,
+                Content = commentModel.Content,
                 PostId = postId,
                 CreateDate = DateTime.Now,
                 AuthorId = authorId
-            });
+            };
+            
+            _context.Comments.Add(comment);
 
             await _context.SaveChangesAsync();
 
-            return comment;
+            commentModel.Id = comment.Id;
+
+            return commentModel;
         }
 
         public async Task<bool> PostExists(string postId)

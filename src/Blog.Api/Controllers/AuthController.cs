@@ -1,11 +1,6 @@
-using Blog.Core.Configurations;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Options;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
 
 namespace Blog.Api.Controllers
 {

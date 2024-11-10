@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Blog.Core.Configurations;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
@@ -47,7 +44,7 @@ namespace Blog.Core.Services
             {
                 await _signInManager.SignInAsync(user, false);
                 await CreateAuthor(registerUser, user);
-                accessToken = JwtGenerate();
+                accessToken = await JwtGenerate(registerUser.Email);
             }
 
             return accessToken;
@@ -60,7 +57,7 @@ namespace Blog.Core.Services
 
             if (result.Succeeded)
             {
-                accessToken = JwtGenerate();
+                accessToken = await JwtGenerate(loginUser.Email);
             }
 
             return accessToken;
@@ -78,13 +75,27 @@ namespace Blog.Core.Services
             await _applicationDbContext.SaveChangesAsync();
         }
 
-        private string JwtGenerate()
+        private async Task<string> JwtGenerate(string email)
         {
+            var user = await _userManager.FindByEmailAsync(email);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName)
+            };
+
+            foreach (var role in roles ?? Enumerable.Empty<string>())
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
 
             var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
+                Subject = new ClaimsIdentity(claims),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpirationHours),

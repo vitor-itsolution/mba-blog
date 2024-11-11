@@ -20,7 +20,8 @@ namespace Blog.Data.Mappings
 
             builder.HasOne(p => p.Post)
             .WithMany(p => p.Comments)
-            .HasForeignKey(p => p.PostId);
+            .HasForeignKey(p => p.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
 
             builder.ToTable("Comments");
         }

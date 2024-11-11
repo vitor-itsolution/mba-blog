@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blog.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241110234352_InitialCreate")]
+    [Migration("20241111022740_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -321,7 +321,8 @@ namespace Blog.Data.Migrations
 
                     b.HasOne("Blog.Data.Models.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Author");
 

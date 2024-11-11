@@ -128,7 +128,9 @@ namespace Blog.Core.Services
             if (!await PostExists(id))
                 return null;
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Posts
+                                     .Include(p=> p.Comments)
+                                     .FirstOrDefaultAsync(p=> p.Id == id);
 
             if (post.AuthorId != author.Id && !_httpContextAccessor.HttpContext.User.IsInRole("Admin"))
             {

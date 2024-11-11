@@ -45,12 +45,16 @@ namespace Blog.Api.Controllers
                 else
                     throw;
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
@@ -62,9 +66,16 @@ namespace Blog.Api.Controllers
             if (!await _commentService.CommentExists(id))
                 return NotFound();
 
-            await _commentService.Delete(id);
+            try
+            {
+                await _commentService.Delete(id);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
 
-            return Ok();
+            return NoContent();
         }
 
     }

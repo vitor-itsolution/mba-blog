@@ -1,9 +1,17 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Blog.Core.Models
+namespace Blog.Api.Models
 {
-    public class CreatePostViewModel
+    public class UpdatePostViewModel
     {
+        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [Display(Name = "Id")]
+        public string Id { get; set; }
+
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Titulo")]
         [StringLength(100, MinimumLength = 1, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]

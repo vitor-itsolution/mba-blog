@@ -1,3 +1,4 @@
+using Blog.Api.Models;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -32,12 +33,12 @@ namespace Blog.Api.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Post(CreatePostViewModel postViewModel)
+        public async Task<IActionResult> Post(CreatePostViewModel createPost)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            var postModel = new PostModel { Title = postViewModel.Title, Content = postViewModel.Content };
+            var postModel = new PostModel { Title = createPost.Title, Content = createPost.Content };
 
             await _postService.Create(postModel);
 
@@ -49,17 +50,25 @@ namespace Blog.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Put([FromRoute] string id, PostModel postModel)
+        public async Task<IActionResult> Put([FromRoute] string id, UpdatePostViewModel updatePost)
         {
-            if (id != postModel.Id)
+            if (id != updatePost.Id)
                 return BadRequest();
+
+            if (!await _postService.PostExists(id))
+                return NotFound();
 
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
             try
             {
-                await _postService.Update(id, postModel);
+                await _postService.Update(id, new PostModel
+                {
+                    Id = updatePost.Id,
+                    Title = updatePost.Title,
+                    Content = updatePost.Content
+                });
 
             }
             catch (DbUpdateConcurrencyException ex)
@@ -70,6 +79,10 @@ namespace Blog.Api.Controllers
                     return NotFound();
                 else
                     throw;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
             }
 
             return NoContent();
@@ -88,10 +101,18 @@ namespace Blog.Api.Controllers
             if (!await _postService.PostExists(id))
                 return NotFound();
 
-            await _postService.Delete(id);
+            try
+            {
+                await _postService.Delete(id);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
 
             return Ok();
         }
+
         [AllowAnonymous]
         [HttpGet("{id}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]

@@ -1,22 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Blog.Data.Context;
-using Blog.Data.Models;
-using Blog.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Blog.Core.Models;
+using Blog.Core.Services.Interfaces;
+using System.Text.Json;
 
 namespace Blog.Web.Controllers
 {
     [Authorize]
+
     public class PostsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IPostService _postService;
+        private readonly ILogger<PostsController> _Logger;
 
-        public PostsController(ApplicationDbContext context)
+        public PostsController(IPostService postService, ILogger<PostsController> logger)
         {
-            _context = context;
-
+            _postService = postService;
+            _Logger = logger;
         }
 
         [AllowAnonymous]
@@ -25,93 +27,48 @@ namespace Blog.Web.Controllers
             ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewData["IsAdmin"] = User?.IsInRole("Admin");
 
-            var posts = await _context.Posts
-                                      .Include(p => p.Author)
-                                      .Include(p => p.Comments)
-                                      .OrderByDescending(p => p.CreateDate).ToListAsync();
-
-            return View(posts.Select(p => new PostModel
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Content,
-                CreateDate = p.CreateDate,
-                AmountComment = p.Comments.Count(),
-                AuthorId = p.Author?.Id!,
-                AuthorName = p.Author?.UserName!
-            }));
+            return View(await _postService.Get());
         }
 
         [AllowAnonymous]
-        [Route("[controller]/{id:Guid}/comments")]
-        public async Task<IActionResult> Comments(Guid id)
+        [Route("[controller]/{id}/comments")]
+        public async Task<IActionResult> Comments(string id)
         {
-            var post = await _context.Posts
-                                     .Include(p => p.Comments)
-                                     .Include(p => p.Author)
-                                     .FirstOrDefaultAsync(p => p.Id == id);
-            if (post == null)
+            if (!await _postService.PostExists(id))
             {
                 return NotFound();
             }
 
             ViewData["AuthorId"] = User?.FindFirstValue(ClaimTypes.NameIdentifier); ;
             ViewData["IsAdmin"] = User?.IsInRole("Admin");
-            ViewData["PostId"] = post.Id;
+            ViewData["PostId"] = id;
 
-
-            var comments = post.Comments.Select(p => new CommentModel
-            {
-                Id = p.Id,
-                PostId = p.PostId,
-                Content = p.Content,
-                AuthorId = p.AuthorId,
-                AuthorName = p.Author?.UserName!,
-                CreateDate = p.CreateDate
-            }).ToList();
-
-            return View(comments);
+            return View(await _postService.GetPostComments(id));
         }
 
-        [Route("[controller]/{id:Guid}/novo-comentario")]
-        public async Task<IActionResult> CreateComment(Guid id)
+        [Route("[controller]/{id}/novo-comentario")]
+        public async Task<IActionResult> CreateComment(string id)
         {
-            var post = await _context.Posts
-                                     .FirstOrDefaultAsync(p => p.Id == id);
-
-
-            if (post == null)
+            if (!await _postService.PostExists(id))
             {
                 return NotFound();
             }
 
-            ViewData["PostId"] = post.Id;
-            return View();
+            ViewData["PostId"] = id;
+            return View(new CommentModel { PostId = id });
         }
 
-        [HttpPost("[controller]/{id:Guid}/novo-comentario")]
-        public async Task<IActionResult> CreateComment([Bind("Content")] CommentModel commentModel, Guid id)
+        [HttpPost("[controller]/{id}/novo-comentario")]
+        public async Task<IActionResult> CreateComment([Bind("Content, PostId")] CommentModel commentModel, string id)
         {
             if (ModelState.IsValid)
             {
-                var post = await _context.Posts.FindAsync(id);
-
-                if (post == null)
+                if (!await _postService.PostExists(id))
                 {
                     return NotFound();
                 }
 
-                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                _context.Comments.Add(new Comment
-                {
-                    Content = commentModel.Content,
-                    PostId = id,
-                    CreateDate = DateTime.Now,
-                    AuthorId = authorId
-                });
-                
-                await _context.SaveChangesAsync();
+                await _postService.CreatePostComment(id, commentModel);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -127,52 +84,32 @@ namespace Blog.Web.Controllers
 
         [HttpPost("[controller]/novo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Content")] PostModel postModel)
+        public async Task<IActionResult> Create([Bind("Title,Content")] PostModel postModel)
         {
             if (ModelState.IsValid)
             {
-                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _postService.Create(postModel);
 
-                var post = new Post
-                {
-                    Title = postModel.Title,
-                    Content = postModel.Content,
-                    CreateDate = postModel.CreateDate,
-                    AuthorId = authorId
-                };
-
-                _context.Posts.Add(post);
-                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
             return View(postModel);
         }
-        [Route("[controller]/editar/{id:Guid}")]
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var post = await _context.Posts.Include(p => p.Author)
-                                           .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (post == null)
+        [Route("[controller]/editar/{id}")]
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (!await _postService.PostExists(id))
             {
                 return NotFound();
             }
 
-            return View(new PostModel
-            {
-                Id = post.Id,
-                Title = post.Title,
-                AuthorId = post.AuthorId,
-                AuthorName = post.Author.UserName,
-                Content = post.Content,
-                CreateDate = post.CreateDate
-            });
+            return View(await _postService.GetById(id));
         }
 
-        [HttpPost("[controller]/editar/{id:Guid}")]
+        [HttpPost("[controller]/editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Content,CreateDate")] PostModel postModel)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Content,CreateDate")] PostModel postModel)
         {
             if (id != postModel.Id)
             {
@@ -183,27 +120,15 @@ namespace Blog.Web.Controllers
             {
                 try
                 {
-                    var post = await _context.Posts.FindAsync(postModel.Id);
-
-                    var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                    if (post.AuthorId != authorId && !User.IsInRole("Admin"))
-                    {
-                        return Forbid();
-                    }
-
-                    post.Title = postModel.Title;
-                    post.Content = postModel.Content;
-                    post.CreateDate = DateTime.Now;
-                    post.AuthorId = authorId;
-
-                    _context.Posts.Update(post);
-                    await _context.SaveChangesAsync();
-
+                    await _postService.Update(id, postModel);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Forbid();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(postModel.Id))
+                    if (!await _postService.PostExists(postModel.Id))
                     {
                         return NotFound();
                     }
@@ -212,21 +137,21 @@ namespace Blog.Web.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
             }
             return View(postModel);
         }
 
-        [Route("[controller]/excluir/{id:Guid}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [Route("[controller]/excluir/{id}")]
+        public async Task<IActionResult> Delete(string id)
         {
-            var post = await _context.Posts
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (post == null)
+            if (!await _postService.PostExists(id))
             {
                 return NotFound();
             }
+
+            var post = await _postService.GetById(id);
 
             return View(new PostModel
             {
@@ -235,37 +160,37 @@ namespace Blog.Web.Controllers
                 Content = post.Content,
                 CreateDate = post.CreateDate,
                 AuthorId = post.AuthorId,
-                AuthorName = post.Author?.UserName
+                // AuthorName = post.Author?.UserName
             });
         }
 
-        [HttpPost("[controller]/excluir/{id:Guid}")]
+        [HttpPost("[controller]/excluir/{id}")]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var post = await _context.Posts.FindAsync(id);
-
-            if (post == null)
+            try
             {
-                return NotFound();
+                if (!await _postService.PostExists(id))
+                {
+                    return NotFound();
+                }
+
+                await _postService.Delete(id);
+
+                return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _Logger.LogError(JsonSerializer.Serialize(ex));
+                return View("Error", $"Permissão negada");
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(JsonSerializer.Serialize(ex));
+                return View("Ocorreu um erro ao processar a solicitação, tente novamente mais tarde");
             }
 
-            var authorId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (post.AuthorId != authorId && !User.IsInRole("Admin"))
-            {
-                return Forbid();
-            }
-
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(actionName: nameof(Index), controllerName: "Posts");
-        }
-
-        private bool PostExists(Guid id)
-        {
-            return _context.Posts.Any(e => e.Id == id);
         }
     }
 }

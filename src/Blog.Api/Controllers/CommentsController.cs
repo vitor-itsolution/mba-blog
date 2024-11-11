@@ -1,33 +1,88 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using Blog.Api.Models;
+using Blog.Core.Models;
+using Blog.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CommentsController : ControllerBase
     {
         private readonly ILogger<CommentsController> _logger;
+        private readonly ICommentService _commentService;
 
-        public CommentsController(ILogger<CommentsController> logger)
+        public CommentsController(ILogger<CommentsController> logger, ICommentService commentService)
         {
             _logger = logger;
+            _commentService = commentService;
         }
-        [HttpPut("{id:Guid}")]
-        public IActionResult Put([FromRoute] Guid id)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Put([FromRoute] string id, UpdateCommentViewModel updateComment)
         {
-            return Ok();
+            if (id != updateComment.Id)
+                return BadRequest();
+
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            try
+            {
+                var commentModel = new CommentModel
+                {
+                    Id = updateComment.Id,
+                    Content = updateComment.Content
+                };
+                
+                await _commentService.Update(id, commentModel);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex.Message);
+
+                if (!await _commentService.CommentExists(id))
+                    return NotFound();
+                else
+                    throw;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+
+            return NoContent();
         }
 
-        [HttpDelete("{id:Guid}")]
-        public IActionResult Delete([FromRoute] Guid id)
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Delete([FromRoute] string id)
         {
-            return Ok();
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest();
+
+            if (!await _commentService.CommentExists(id))
+                return NotFound();
+
+            try
+            {
+                await _commentService.Delete(id);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+
+            return NoContent();
         }
 
     }

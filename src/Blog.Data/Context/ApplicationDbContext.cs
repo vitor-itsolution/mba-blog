@@ -9,6 +9,7 @@ public class ApplicationDbContext : IdentityDbContext
 {
     public DbSet<Post> Posts { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<Author> Authors { get; set; }
 
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -25,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext
 
         builder.ApplyConfiguration(new PostMapping());
         builder.ApplyConfiguration(new CommentMapping());
+        builder.ApplyConfiguration(new AuthorMapping());
 
         base.OnModelCreating(builder);
     }

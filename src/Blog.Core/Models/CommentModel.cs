@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Blog.Web.Models
+namespace Blog.Core.Models
 {
     public class CommentModel
     {
         [Key]
-        public Guid Id { get; set; }
-        public Guid PostId { get; set; }
+        public string Id { get; set; }
+        public string PostId { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Comentário")]

@@ -1,4 +1,4 @@
-@model Blog.Web.Models.CommentModel
+@model Blog.Core.Models.CommentModel
 
 @{
     ViewData["Title"] = "Cadastrar novo comentário";
@@ -12,6 +12,8 @@
     <div class="col-md-4">
         <form asp-action="CreateComment">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <input type="hidden" asp-for="PostId" />
 
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>

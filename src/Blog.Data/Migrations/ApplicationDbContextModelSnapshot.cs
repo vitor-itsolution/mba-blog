@@ -22,25 +22,47 @@ namespace Blog.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Blog.Data.Models.Author", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Authors", (string)null);
+                });
+
             modelBuilder.Entity("Blog.Data.Models.Comment", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(1000)");
 
                     b.Property<string>("AuthorId")
                         .HasColumnType("varchar(1000)");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(300)
+                        .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("PostId")
+                        .HasColumnType("varchar(1000)");
 
                     b.HasKey("Id");
 
@@ -53,16 +75,15 @@ namespace Blog.Data.Migrations
 
             modelBuilder.Entity("Blog.Data.Models.Post", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(1000)");
 
                     b.Property<string>("AuthorId")
                         .HasColumnType("varchar(1000)");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(300)
+                        .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
                     b.Property<DateTime>("CreateDate")
@@ -70,7 +91,7 @@ namespace Blog.Data.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(100)
                         .HasColumnType("varchar(1000)");
 
                     b.HasKey("Id");
@@ -278,17 +299,26 @@ namespace Blog.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Blog.Data.Models.Author", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithOne()
+                        .HasForeignKey("Blog.Data.Models.Author", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Blog.Data.Models.Comment", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
-                        .WithMany()
+                    b.HasOne("Blog.Data.Models.Author", "Author")
+                        .WithMany("Comments")
                         .HasForeignKey("AuthorId");
 
                     b.HasOne("Blog.Data.Models.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PostId");
 
                     b.Navigation("Author");
 
@@ -297,8 +327,8 @@ namespace Blog.Data.Migrations
 
             modelBuilder.Entity("Blog.Data.Models.Post", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
-                        .WithMany()
+                    b.HasOne("Blog.Data.Models.Author", "Author")
+                        .WithMany("Posts")
                         .HasForeignKey("AuthorId");
 
                     b.Navigation("Author");
@@ -353,6 +383,13 @@ namespace Blog.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Blog.Data.Models.Author", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("Blog.Data.Models.Post", b =>

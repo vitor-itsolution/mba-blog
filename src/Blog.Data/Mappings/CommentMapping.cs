@@ -15,8 +15,12 @@ namespace Blog.Data.Mappings
             .HasMaxLength(1000);
 
             builder.HasOne(p => p.Author)
-            .WithMany()
+            .WithMany(p => p.Comments)
             .HasForeignKey(p => p.AuthorId);
+
+            builder.HasOne(p => p.Post)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(p => p.PostId);
 
             builder.ToTable("Comments");
         }

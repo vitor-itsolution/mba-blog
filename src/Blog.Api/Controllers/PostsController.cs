@@ -1,52 +1,156 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using Blog.Api.Models;
+using Blog.Core.Models;
+using Blog.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PostsController : ControllerBase
     {
         private readonly ILogger<PostsController> _logger;
-
-        public PostsController(ILogger<PostsController> logger)
+        private readonly IPostService _postService;
+        public PostsController(ILogger<PostsController> logger, IPostService postService)
         {
             _logger = logger;
+            _postService = postService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public IActionResult Get()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Get()
         {
-            return Ok();
+            return Ok(await _postService.Get());
         }
-
         [HttpPost]
-        public IActionResult Post()
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Post(CreatePostViewModel createPost)
         {
-            return Ok();
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            var postModel = new PostModel { Title = createPost.Title, Content = createPost.Content };
+
+            await _postService.Create(postModel);
+
+            return CreatedAtAction(nameof(Post), new { id = postModel.Id }, postModel);
         }
 
-        [HttpPut("{id:Guid}")]
-        public IActionResult Put([FromRoute] Guid id)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Put([FromRoute] string id, UpdatePostViewModel updatePost)
         {
-            return Ok();
+            if (id != updatePost.Id)
+                return BadRequest();
+
+            if (!await _postService.PostExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            try
+            {
+                await _postService.Update(id, new PostModel
+                {
+                    Id = updatePost.Id,
+                    Title = updatePost.Title,
+                    Content = updatePost.Content
+                });
+
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex.Message);
+
+                if (!await _postService.PostExists(id))
+                    return NotFound();
+                else
+                    throw;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+
+            return NoContent();
         }
 
-        [HttpDelete("{id:Guid}")]
-        public IActionResult Delete([FromRoute] Guid id)
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Delete([FromRoute] string id)
         {
-            return Ok();
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest();
+
+            if (!await _postService.PostExists(id))
+                return NotFound();
+
+            try
+            {
+                await _postService.Delete(id);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+
+            return NoContent();
         }
 
-        [HttpGet("{id:Guid}/comments")]
-        public IActionResult Get([FromRoute] Guid id)
+        [AllowAnonymous]
+        [HttpGet("{id}/comments")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Get([FromRoute] string id)
         {
-            return Ok();
+            if (!await _postService.PostExists(id))
+                return NotFound();
+
+            return Ok(await _postService.GetPostComments(id));
+        }
+
+        [HttpPost("{id}/comments")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> PostComments([FromRoute] string id, [FromBody] CreatePostCommentViewModel createPostComment)
+        {
+            if (!await _postService.PostExists(id))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            if (id != createPostComment.PostId)
+                return BadRequest();
+
+            var commentModel = new CommentModel
+            {
+                PostId = createPostComment.PostId,
+                Content = createPostComment.Content
+            };
+            
+            commentModel = await _postService.CreatePostComment(id, commentModel);
+
+            return CreatedAtAction(nameof(PostComments), new { id = commentModel.Id }, commentModel);
         }
     }
 }

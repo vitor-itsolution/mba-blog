@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Blog.Web.Models
+namespace Blog.Core.Models
 {
     public class CommentModel
     {
         [Key]
-        public Guid Id { get; set; }
-        public Guid PostId { get; set; }
+        public string Id { get; set; }
+        public string PostId { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [Display(Name = "Comentário")]
-        [StringLength(300, MinimumLength = 10, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
+        [StringLength(1000, MinimumLength = 10, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
         public string Content { get; set; }
 
         [Display(Name = "Data")]

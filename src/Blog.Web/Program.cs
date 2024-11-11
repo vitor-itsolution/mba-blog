@@ -1,10 +1,16 @@
-using Blog.Data.Configurations;
+using Blog.Core.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDatabaseSelector();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddServicesConfigurations();
+
+builder.Services.AddControllersWithViews()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                });
 
 var app = builder.Build();
 
@@ -30,6 +36,6 @@ app.MapControllerRoute(
     pattern: "{controller=Posts}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-app.UseDbMigrationHelper();
+app.AddWebApplicationConfigurations();
 
 app.Run();

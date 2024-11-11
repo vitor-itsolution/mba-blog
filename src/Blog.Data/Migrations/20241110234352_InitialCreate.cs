@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -157,12 +156,32 @@ namespace Blog.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Authors",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(1000)", nullable: false),
+                    Name = table.Column<string>(type: "varchar(1000)", maxLength: 200, nullable: false),
+                    Email = table.Column<string>(type: "varchar(1000)", maxLength: 50, nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Authors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Authors_AspNetUsers_Id",
+                        column: x => x.Id,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "varchar(1000)", maxLength: 50, nullable: false),
-                    Content = table.Column<string>(type: "varchar(1000)", maxLength: 300, nullable: false),
+                    Id = table.Column<string>(type: "varchar(1000)", nullable: false),
+                    Title = table.Column<string>(type: "varchar(1000)", maxLength: 100, nullable: false),
+                    Content = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false),
                     AuthorId = table.Column<string>(type: "varchar(1000)", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -170,9 +189,9 @@ namespace Blog.Data.Migrations
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_AspNetUsers_AuthorId",
+                        name: "FK_Posts_Authors_AuthorId",
                         column: x => x.AuthorId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "Authors",
                         principalColumn: "Id");
                 });
 
@@ -180,26 +199,25 @@ namespace Blog.Data.Migrations
                 name: "Comments",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "varchar(1000)", nullable: false),
                     AuthorId = table.Column<string>(type: "varchar(1000)", nullable: true),
-                    Content = table.Column<string>(type: "varchar(1000)", maxLength: 300, nullable: false),
-                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Content = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false),
+                    PostId = table.Column<string>(type: "varchar(1000)", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Comments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Comments_AspNetUsers_AuthorId",
+                        name: "FK_Comments_Authors_AuthorId",
                         column: x => x.AuthorId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "Authors",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Comments_Posts_PostId",
                         column: x => x.PostId,
                         principalTable: "Posts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -283,6 +301,9 @@ namespace Blog.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Posts");
+
+            migrationBuilder.DropTable(
+                name: "Authors");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

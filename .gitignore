@@ -413,9 +413,9 @@ FodyWeavers.xsd
 *.sln.iml
 
 #SqLite
-src/Blog.Web/BlogMba.db
-src/Blog.Web/BlogMba.db-shm
-src/Blog.Web/BlogMba.db-wal
+src/database/BlogMba.db
+src/database/BlogMba.db-shm
+src/database/BlogMba.db-wal
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio

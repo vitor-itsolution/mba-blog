@@ -1,4 +1,5 @@
 using Blog.Data.Context;
+using Blog.Data.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -8,13 +9,6 @@ using Microsoft.Extensions.Hosting;
 
 namespace Blog.Data.Configurations
 {
-    public static class DbMigrationHelperExtension
-    {
-        public static void UseDbMigrationHelper(this WebApplication app)
-        {
-            DbConfigurationHelper.EnsureSeedData(app).Wait();
-        }
-    }
     public static class DbConfigurationHelper
     {
         public static async Task EnsureSeedData(WebApplication serviceScope)
@@ -49,7 +43,7 @@ namespace Blog.Data.Configurations
                 NormalizedEmail = "ADMIN@TESTE.COM",
                 AccessFailedCount = 0,
                 LockoutEnabled = false,
-                PasswordHash = "AQAAAAIAAYagAAAAEFkrTUVXTAM0THUlCWfiDLuTiFRYu44h2ehK0R044VR8fQwB17N4dhXoJPybI5YZAg==",
+                PasswordHash = "AQAAAAIAAYagAAAAEFkrTUVXTAM0THUlCWfiDLuTiFRYu44h2ehK0R044VR8fQwB17N4dhXoJPybI5YZAg==", //Teste@1
                 TwoFactorEnabled = false,
                 ConcurrencyStamp = Guid.NewGuid().ToString(),
                 EmailConfirmed = true,
@@ -74,6 +68,12 @@ namespace Blog.Data.Configurations
             await context.Roles.AddAsync(role);
             await context.Users.AddAsync(user);
             await context.UserRoles.AddAsync(userRole);
+            
+            await context.Authors.AddAsync(new Author{
+                Id = user.Id,
+                Name = "Administrator",
+                Email = user.Email
+            });
 
             await context.SaveChangesAsync();
 

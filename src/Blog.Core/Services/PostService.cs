@@ -1,10 +1,8 @@
-using System.Security.Claims;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Blog.Data.Context;
 using Blog.Data.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Core.Services
@@ -65,7 +63,8 @@ namespace Blog.Core.Services
             if (!await PostExists(id))
                 return null;
 
-            var comments = await _context.Comments.Where(p => p.PostId == id).ToListAsync();
+            var comments = await _context.Comments.Include(p => p.Author)
+                                                  .Where(p => p.PostId == id).ToListAsync();
 
             return comments?.Select(p => new CommentModel
             {
@@ -165,6 +164,8 @@ namespace Blog.Core.Services
             await _context.SaveChangesAsync();
 
             commentModel.Id = comment.Id;
+            commentModel.AuthorName = author.Name;
+            commentModel.AuthorId = author.Id;
 
             return commentModel;
         }

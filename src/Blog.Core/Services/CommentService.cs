@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Blog.Data.Context;
@@ -50,7 +49,6 @@ namespace Blog.Core.Services
             }
 
             comment.Content = commentModel.Content;
-            comment.CreateDate = DateTime.Now;
 
             _context.Comments.Update(comment);
             await _context.SaveChangesAsync();

@@ -1,3 +1,4 @@
+using Blog.Api.Models;
 using Blog.Core.Models;
 using Blog.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -24,9 +25,9 @@ namespace Blog.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Put([FromRoute] string id, CommentModel commentModel)
+        public async Task<IActionResult> Put([FromRoute] string id, UpdateCommentViewModel updateComment)
         {
-            if (id != commentModel.Id)
+            if (id != updateComment.Id)
                 return BadRequest();
 
             if (!ModelState.IsValid)
@@ -34,6 +35,12 @@ namespace Blog.Api.Controllers
 
             try
             {
+                var commentModel = new CommentModel
+                {
+                    Id = updateComment.Id,
+                    Content = updateComment.Content
+                };
+                
                 await _commentService.Update(id, commentModel);
             }
             catch (DbUpdateConcurrencyException ex)

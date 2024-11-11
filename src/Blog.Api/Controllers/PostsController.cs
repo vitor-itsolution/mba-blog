@@ -89,7 +89,7 @@ namespace Blog.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
@@ -110,7 +110,7 @@ namespace Blog.Api.Controllers
                 return Forbid();
             }
 
-            return Ok();
+            return NoContent();
         }
 
         [AllowAnonymous]
@@ -131,7 +131,7 @@ namespace Blog.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> PostComments([FromRoute] string id, [FromBody] CommentModel commentModel)
+        public async Task<IActionResult> PostComments([FromRoute] string id, [FromBody] CreatePostCommentViewModel createPostComment)
         {
             if (!await _postService.PostExists(id))
                 return NotFound();
@@ -139,10 +139,16 @@ namespace Blog.Api.Controllers
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            if (id != commentModel.PostId)
+            if (id != createPostComment.PostId)
                 return BadRequest();
 
-            await _postService.CreatePostComment(id, commentModel);
+            var commentModel = new CommentModel
+            {
+                PostId = createPostComment.PostId,
+                Content = createPostComment.Content
+            };
+            
+            commentModel = await _postService.CreatePostComment(id, commentModel);
 
             return CreatedAtAction(nameof(PostComments), new { id = commentModel.Id }, commentModel);
         }

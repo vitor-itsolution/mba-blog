@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Blog.Data.Context;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Blog.Core.Models;

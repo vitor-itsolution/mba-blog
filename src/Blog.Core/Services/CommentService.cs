@@ -41,10 +41,10 @@ namespace Blog.Core.Services
                 return null;
 
 
-            var authorId = _httpContextAccessor.HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var author = await _context.Authors.FirstOrDefaultAsync(p => p.Email == _httpContextAccessor.HttpContext.User.Identity.Name);
             var comment = await _context.Comments.FindAsync(commentModel.Id);
 
-            if (comment.AuthorId != authorId && !_httpContextAccessor.HttpContext.User.IsInRole("Admin") || commentId != commentModel.Id)
+            if (comment.AuthorId != author.Id && !_httpContextAccessor.HttpContext.User.IsInRole("Admin") || commentId != commentModel.Id)
             {
                 throw new UnauthorizedAccessException();
             }
@@ -61,14 +61,14 @@ namespace Blog.Core.Services
 
         public async Task<string> Delete(string id)
         {
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var author = await _context.Authors.FirstOrDefaultAsync(p => p.Email == _httpContextAccessor.HttpContext.User.Identity.Name);
 
-            if (!await  CommentExists(id))
+            if (!await CommentExists(id))
                 return null;
 
             var comment = await _context.Comments.FindAsync(id);
 
-            if (comment.AuthorId != authorId && !_httpContextAccessor.HttpContext.User.IsInRole("Admin"))
+            if (comment.AuthorId != author.Id && !_httpContextAccessor.HttpContext.User.IsInRole("Admin"))
             {
                 throw new UnauthorizedAccessException();
             }

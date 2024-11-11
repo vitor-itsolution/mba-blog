@@ -4,6 +4,7 @@ using Blog.Core.Services.Interfaces;
 using Blog.Data.Context;
 using Blog.Data.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Core.Services
@@ -79,15 +80,14 @@ namespace Blog.Core.Services
 
         public async Task<PostModel> Create(PostModel postModel)
         {
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var author = await _context.Authors.FindAsync(authorId);
+            var author = await _context.Authors.FirstOrDefaultAsync(p => p.Email == _httpContextAccessor.HttpContext.User.Identity.Name);
 
             var post = new Post
             {
                 Title = postModel.Title,
                 Content = postModel.Content,
                 CreateDate = postModel.CreateDate,
-                AuthorId = authorId
+                AuthorId = author.Id
             };
 
             _context.Posts.Add(post);
@@ -102,11 +102,11 @@ namespace Blog.Core.Services
 
         public async Task<PostModel> Update(string id, PostModel postModel)
         {
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var author = await _context.Authors.FirstOrDefaultAsync(p => p.Email == _httpContextAccessor.HttpContext.User.Identity.Name);
 
             var post = await _context.Posts.FindAsync(postModel.Id);
 
-            if (post.AuthorId != authorId && !_httpContextAccessor.HttpContext.User.IsInRole("Admin") || id != postModel.Id)
+            if (post.AuthorId != author.Id && !_httpContextAccessor.HttpContext.User.IsInRole("Admin") || id != postModel.Id)
             {
                 throw new UnauthorizedAccessException();
             }
@@ -114,7 +114,7 @@ namespace Blog.Core.Services
             post.Title = postModel.Title;
             post.Content = postModel.Content;
             post.CreateDate = DateTime.Now;
-            post.AuthorId = authorId;
+            post.AuthorId = author.Id;
 
             _context.Entry(post).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -124,14 +124,14 @@ namespace Blog.Core.Services
 
         public async Task<string> Delete(string id)
         {
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var author = await _context.Authors.FirstOrDefaultAsync(p => p.Email == _httpContextAccessor.HttpContext.User.Identity.Name);
 
             if (!await PostExists(id))
                 return null;
 
             var post = await _context.Posts.FindAsync(id);
 
-            if (post.AuthorId != authorId && !_httpContextAccessor.HttpContext.User.IsInRole("Admin"))
+            if (post.AuthorId != author.Id && !_httpContextAccessor.HttpContext.User.IsInRole("Admin"))
             {
                 throw new UnauthorizedAccessException();
             }
@@ -150,14 +150,14 @@ namespace Blog.Core.Services
             if (postId != commentModel.PostId)
                 throw new UnauthorizedAccessException();
 
-            var authorId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var author = await _context.Authors.FirstOrDefaultAsync(p => p.Email == _httpContextAccessor.HttpContext.User.Identity.Name);
 
             var comment = new Comment
             {
                 Content = commentModel.Content,
                 PostId = postId,
                 CreateDate = DateTime.Now,
-                AuthorId = authorId
+                AuthorId = author.Id
             };
 
             _context.Comments.Add(comment);

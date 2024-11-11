@@ -182,12 +182,12 @@ namespace Blog.Web.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                _Logger.LogError(JsonSerializer.Serialize(ex));
+                _Logger.LogError(ex.Message);
                 return View("Error", $"Permissão negada");
             }
             catch (Exception ex)
             {
-                _Logger.LogError(JsonSerializer.Serialize(ex));
+                _Logger.LogError(ex.Message);
                 return View("Ocorreu um erro ao processar a solicitação, tente novamente mais tarde");
             }
 

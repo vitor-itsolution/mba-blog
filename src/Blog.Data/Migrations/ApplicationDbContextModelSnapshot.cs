@@ -318,7 +318,8 @@ namespace Blog.Data.Migrations
 
                     b.HasOne("Blog.Data.Models.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Author");
 

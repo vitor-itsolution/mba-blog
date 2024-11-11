@@ -93,12 +93,12 @@ namespace Blog.Web.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogError(JsonSerializer.Serialize(ex));
+                _logger.LogError(ex.Message);
                 return Forbid();
             }
             catch (Exception ex)
             {
-                _logger.LogError(JsonSerializer.Serialize(ex));
+                _logger.LogError(ex.Message);
                 return View("Ocorreu um erro ao processar a solicitação, tente novamente mais tarde");
             }
 
